@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
 import { useAircraftStore } from "../store/useAircraftStore";
+import { useVesselStore } from "../store/useVesselStore";
+import { useMapStore } from "../store/useMapStore";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -9,6 +11,7 @@ import {
   TILE_URL,
 } from "./mapConfig";
 import AircraftLayer from "./AircraftLayer";
+import VesselLayer from "./VesselLayer";
 import TrailsLayer from "./TrailsLayer";
 
 /**
@@ -21,16 +24,17 @@ function FlyController() {
     let lastNonce = -1;
     let lastFollowPos = "";
 
-    const unsub = useAircraftStore.subscribe((state) => {
-      // One-shot pans (list click, "Center on map").
+    // One-shot pans (list click, "Center on map") come from the map store.
+    const unsubMap = useMapStore.subscribe((state) => {
       const t = state.flyTarget;
       if (t && t.nonce !== lastNonce) {
         lastNonce = t.nonce;
         map.flyTo([t.lat, t.lon], Math.max(map.getZoom(), 6), { duration: 0.6 });
-        return;
       }
+    });
 
-      // Continuous follow: keep the selected aircraft centered as it moves.
+    // Continuous follow keeps the selected aircraft centered as it moves.
+    const unsubAir = useAircraftStore.subscribe((state) => {
       if (state.followSelected && state.selectedHex) {
         const ac = state.aircraft.get(state.selectedHex);
         if (ac && typeof ac.lat === "number" && typeof ac.lon === "number") {
@@ -44,15 +48,23 @@ function FlyController() {
         lastFollowPos = "";
       }
     });
-    return unsub;
+
+    return () => {
+      unsubMap();
+      unsubAir();
+    };
   }, [map]);
   return null;
 }
 
-/** Clears the selection when the empty map is clicked. */
+/** Clears both selections when the empty map is clicked. */
 function DeselectOnMapClick() {
-  const select = useAircraftStore((s) => s.select);
-  useMapEvent("click", () => select(null));
+  const selectAir = useAircraftStore((s) => s.select);
+  const clearVessel = useVesselStore((s) => s.clearSelection);
+  useMapEvent("click", () => {
+    selectAir(null);
+    clearVessel();
+  });
   return null;
 }
 
@@ -71,6 +83,7 @@ export default function MapView() {
     >
       <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} maxZoom={MAX_ZOOM} />
       <TrailsLayer />
+      <VesselLayer />
       <AircraftLayer />
       <FlyController />
       <DeselectOnMapClick />

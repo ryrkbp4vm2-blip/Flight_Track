@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAircraftStore } from "../store/useAircraftStore";
+import { useVesselStore } from "../store/useVesselStore";
+import { useMapStore, showAir, showSea } from "../store/useMapStore";
 import { formatAge } from "../lib/format";
 import { isEmergency } from "../lib/emergency";
 
@@ -15,6 +17,8 @@ export default function StatusBar() {
     (s) => [...s.aircraft.values()].filter(isEmergency).length,
   );
   const setFilter = useAircraftStore((s) => s.setFilter);
+  const vesselCount = useVesselStore((s) => s.vessels.size);
+  const layers = useMapStore((s) => s.activeLayers);
 
   // Re-render every second so the "age" label stays live.
   const [, tick] = useState(0);
@@ -29,7 +33,17 @@ export default function StatusBar() {
   return (
     <div className="status-bar">
       <span className="status-count">
-        <strong>{total}</strong> military aircraft
+        {showAir(layers) && (
+          <>
+            <strong>{total}</strong> aircraft
+          </>
+        )}
+        {showAir(layers) && showSea(layers) && <span className="status-sep"> · </span>}
+        {showSea(layers) && (
+          <>
+            <strong>{vesselCount}</strong> vessels
+          </>
+        )}
       </span>
       <span className={`status-age${stale ? " stale" : ""}`}>
         {status.error

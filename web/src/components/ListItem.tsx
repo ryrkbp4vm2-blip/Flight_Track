@@ -1,5 +1,6 @@
 import type { TrackedAircraft } from "../../../shared/types";
 import { useAircraftStore } from "../store/useAircraftStore";
+import { useMapStore } from "../store/useMapStore";
 import { altitudeColor, COLOR_EMERGENCY, COLOR_WARNING } from "../map/mapConfig";
 import { emergencyInfo } from "../lib/emergency";
 import {
@@ -13,7 +14,7 @@ import {
 export default function ListItem({ ac }: { ac: TrackedAircraft }) {
   const selectedHex = useAircraftStore((s) => s.selectedHex);
   const select = useAircraftStore((s) => s.select);
-  const flyTo = useAircraftStore((s) => s.flyTo);
+  const flyTo = useMapStore((s) => s.flyTo);
   const selected = ac.hex === selectedHex;
   const em = emergencyInfo(ac);
   const dotColor = em

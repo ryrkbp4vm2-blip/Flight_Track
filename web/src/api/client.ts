@@ -1,15 +1,21 @@
-import type { HealthResponse, MilResponse } from "../../../shared/types";
+import type { MilResponse, VesselResponse } from "../../../shared/types";
 
-/** Fetch the latest military feed from our same-origin proxy. */
-export async function fetchMil(signal?: AbortSignal): Promise<MilResponse> {
-  const res = await fetch("/api/mil", { signal, cache: "no-store" });
-  if (!res.ok) throw new Error(`/api/mil ${res.status}`);
-  return (await res.json()) as MilResponse;
+export interface FeedResult<T> {
+  data: T;
+  /** True when the server is serving bundled/simulated sample data. */
+  sample: boolean;
 }
 
-/** Fetch proxy diagnostics. */
-export async function fetchHealth(signal?: AbortSignal): Promise<HealthResponse> {
-  const res = await fetch("/api/health", { signal, cache: "no-store" });
-  if (!res.ok) throw new Error(`/api/health ${res.status}`);
-  return (await res.json()) as HealthResponse;
+/** Fetch the latest military aircraft feed from our same-origin proxy. */
+export async function fetchMil(signal?: AbortSignal): Promise<FeedResult<MilResponse>> {
+  const res = await fetch("/api/mil", { signal, cache: "no-store" });
+  if (!res.ok) throw new Error(`/api/mil ${res.status}`);
+  return { data: (await res.json()) as MilResponse, sample: res.headers.get("X-Data-Sample") === "1" };
+}
+
+/** Fetch the latest military vessel feed from our same-origin proxy. */
+export async function fetchVessels(signal?: AbortSignal): Promise<FeedResult<VesselResponse>> {
+  const res = await fetch("/api/vessels", { signal, cache: "no-store" });
+  if (!res.ok) throw new Error(`/api/vessels ${res.status}`);
+  return { data: (await res.json()) as VesselResponse, sample: res.headers.get("X-Data-Sample") === "1" };
 }

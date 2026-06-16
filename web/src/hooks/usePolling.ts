@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { fetchMil } from "../api/client";
+import { fetchMil, fetchVessels } from "../api/client";
 import { useAircraftStore } from "../store/useAircraftStore";
+import { useVesselStore } from "../store/useVesselStore";
 
 /** Poll interval in ms while the tab is visible. */
 const POLL_MS = 4000;
@@ -13,6 +14,8 @@ const POLL_MS = 4000;
 export function usePolling(): void {
   const ingest = useAircraftStore((s) => s.ingest);
   const setError = useAircraftStore((s) => s.setError);
+  const ingestVessels = useVesselStore((s) => s.ingest);
+  const setVesselError = useVesselStore((s) => s.setError);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -22,14 +25,19 @@ export function usePolling(): void {
     async function tick() {
       controller?.abort();
       controller = new AbortController();
-      try {
-        const resp = await fetchMil(controller.signal);
-        if (cancelled) return;
-        ingest(resp);
-      } catch (err) {
-        if (cancelled || (err as Error).name === "AbortError") return;
-        setError(err instanceof Error ? err.message : String(err));
-      }
+      const signal = controller.signal;
+      await Promise.all([
+        fetchMil(signal)
+          .then(({ data, sample }) => !cancelled && ingest(data, { sample }))
+          .catch((err: Error) => {
+            if (!cancelled && err.name !== "AbortError") setError(err.message);
+          }),
+        fetchVessels(signal)
+          .then(({ data, sample }) => !cancelled && ingestVessels(data, { sample }))
+          .catch((err: Error) => {
+            if (!cancelled && err.name !== "AbortError") setVesselError(err.message);
+          }),
+      ]);
     }
 
     function start() {
@@ -59,5 +67,5 @@ export function usePolling(): void {
       stop();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [ingest, setError]);
+  }, [ingest, setError, ingestVessels, setVesselError]);
 }

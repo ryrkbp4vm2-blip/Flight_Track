@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { MilResponse, TrackedAircraft, TrackPoint } from "../../../shared/types";
 import { altitudeFt, hasPosition } from "../lib/format";
 import { appendTrackPoint } from "../lib/trails";
+import { useVesselStore } from "./useVesselStore";
 
 /** Drop aircraft we haven't heard from in this long (ms). */
 const STALE_MS = 120_000;
@@ -30,13 +31,10 @@ interface AircraftState {
   /** When true, keep the selected aircraft centered as it moves. */
   followSelected: boolean;
   status: Status;
-  /** Map pan request; `nonce` changes each call so repeats still fire. */
-  flyTarget: { lat: number; lon: number; nonce: number } | null;
 
   ingest: (resp: MilResponse, meta?: { sample?: boolean }) => void;
   select: (hex: string | null) => void;
   toggleFollow: () => void;
-  flyTo: (lat: number, lon: number) => void;
   setFilter: (text: string) => void;
   setSort: (key: SortKey) => void;
   toggleAllTrails: () => void;
@@ -53,7 +51,6 @@ export const useAircraftStore = create<AircraftState>((set) => ({
   showAllTrails: false,
   followSelected: false,
   status: { lastUpdate: null, error: null, total: 0, sample: false },
-  flyTarget: null,
 
   ingest: (resp, meta) =>
     set((state) => {
@@ -95,13 +92,16 @@ export const useAircraftStore = create<AircraftState>((set) => ({
       };
     }),
 
-  // Clearing the selection also stops following.
-  select: (hex) => set(hex === null ? { selectedHex: null, followSelected: false } : { selectedHex: hex }),
+  // Clearing the selection also stops following. Selecting an aircraft clears
+  // any vessel selection so only one detail panel shows.
+  select: (hex) => {
+    if (hex === null) set({ selectedHex: null, followSelected: false });
+    else {
+      set({ selectedHex: hex });
+      useVesselStore.getState().clearSelection();
+    }
+  },
   toggleFollow: () => set((state) => ({ followSelected: !state.followSelected })),
-  flyTo: (lat, lon) =>
-    set((state) => ({
-      flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 },
-    })),
   setFilter: (text) => set({ filterText: text }),
   setSort: (key) =>
     set((state) =>

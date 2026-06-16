@@ -83,3 +83,46 @@ export interface TrackedAircraft extends Aircraft {
   /** Client time (ms) we last received a position for this aircraft. */
   lastSeen: number;
 }
+
+/**
+ * A naval/maritime vessel, modeled on AIS fields. Used for military ship
+ * tracking. Like aircraft, most fields can be absent depending on source.
+ */
+export interface Vessel {
+  /** Maritime Mobile Service Identity — the stable unique key. */
+  mmsi: string;
+  name?: string;
+  /** Radio callsign. */
+  callsign?: string;
+  lat?: number;
+  lon?: number;
+  /** Speed over ground, knots. */
+  sog?: number;
+  /** Course over ground, degrees. */
+  cog?: number;
+  /** True heading, degrees (used for icon rotation; falls back to cog). */
+  heading?: number;
+  /** Free-text vessel type, e.g. "Aircraft Carrier", "Destroyer". */
+  type?: string;
+  /** Operating navy / flag state, e.g. "USA", "UK". */
+  country?: string;
+  /** Pennant / hull number, e.g. "CVN-78". */
+  hull?: string;
+  /** AIS navigational status, e.g. "Under way using engine". */
+  navStatus?: string;
+  /** Length overall, meters. */
+  length?: number;
+  /** Seconds since the last position report. */
+  seen_pos?: number;
+}
+
+export interface VesselResponse {
+  vessels: Vessel[];
+  now: number;
+  total: number;
+}
+
+/** A vessel enriched with client-side bookkeeping. */
+export interface TrackedVessel extends Vessel {
+  lastSeen: number;
+}

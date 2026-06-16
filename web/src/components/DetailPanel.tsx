@@ -1,4 +1,5 @@
 import { useAircraftStore } from "../store/useAircraftStore";
+import { useMapStore } from "../store/useMapStore";
 import { classLabel, classifyAircraft } from "../lib/classify";
 import { emergencyInfo } from "../lib/emergency";
 import {
@@ -24,7 +25,7 @@ export default function DetailPanel() {
   const selectedHex = useAircraftStore((s) => s.selectedHex);
   const ac = useAircraftStore((s) => (selectedHex ? s.aircraft.get(selectedHex) : undefined));
   const select = useAircraftStore((s) => s.select);
-  const flyTo = useAircraftStore((s) => s.flyTo);
+  const flyTo = useMapStore((s) => s.flyTo);
   const followSelected = useAircraftStore((s) => s.followSelected);
   const toggleFollow = useAircraftStore((s) => s.toggleFollow);
 

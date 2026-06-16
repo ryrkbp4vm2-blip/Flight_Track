@@ -5,6 +5,7 @@ import express from "express";
 import compression from "compression";
 import { config } from "./config.js";
 import { startPolling, getMil, getHealth } from "./milCache.js";
+import { startVesselPolling, getVessels, getVesselHealth } from "./vesselCache.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Built static assets live in web/dist (one level up from server/).
@@ -24,9 +25,17 @@ app.get("/api/mil", (_req, res) => {
   res.json(getMil());
 });
 
+app.get("/api/vessels", (_req, res) => {
+  const health = getVesselHealth();
+  if (health.ageMs !== null) res.setHeader("X-Data-Age-Ms", String(health.ageMs));
+  res.setHeader("X-Data-Sample", health.sample ? "1" : "0");
+  res.setHeader("Cache-Control", "no-store");
+  res.json(getVessels());
+});
+
 app.get("/api/health", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
-  res.json(getHealth());
+  res.json({ aircraft: getHealth(), vessels: getVesselHealth() });
 });
 
 // --- Static PWA + SPA fallback -------------------------------------------
@@ -51,6 +60,7 @@ if (fs.existsSync(webDist)) {
 }
 
 startPolling();
+startVesselPolling();
 
 app.listen(config.port, () => {
   // eslint-disable-next-line no-console

@@ -3,7 +3,9 @@ import MapView from "./map/MapView";
 import SearchBar from "./components/SearchBar";
 import StatusBar from "./components/StatusBar";
 import DetailPanel from "./components/DetailPanel";
-import AircraftList from "./components/AircraftList";
+import VesselDetailPanel from "./components/VesselDetailPanel";
+import ListPanel from "./components/ListPanel";
+import LayerToggle from "./components/LayerToggle";
 import Legend from "./components/Legend";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
@@ -32,10 +34,12 @@ export default function App() {
         </button>
       </header>
 
-      {listOpen && <AircraftList onClose={() => setListOpen(false)} />}
+      {listOpen && <ListPanel onClose={() => setListOpen(false)} />}
 
+      <LayerToggle />
       <Legend />
       <DetailPanel />
+      <VesselDetailPanel />
       <StatusBar />
     </div>
   );
