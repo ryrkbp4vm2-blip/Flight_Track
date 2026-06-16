@@ -4,6 +4,7 @@ import L from "leaflet";
 import { useAircraftStore } from "../store/useAircraftStore";
 import { filterAircraft } from "../store/selectors";
 import { altitudeFt, callsign, hasPosition } from "../lib/format";
+import { classifyAircraft, type AircraftClass } from "../lib/classify";
 import { COLOR_SELECTED, altitudeColor } from "./mapConfig";
 import { planeIcon, rotateMarkerEl } from "./planeIcon";
 
@@ -12,6 +13,7 @@ interface MarkerRec {
   track: number;
   color: string;
   selected: boolean;
+  cls: AircraftClass;
 }
 
 /**
@@ -47,29 +49,31 @@ export default function AircraftLayer() {
         const track = typeof ac.track === "number" ? ac.track : 0;
         const selected = ac.hex === selectedHex;
         const color = selected ? COLOR_SELECTED : altitudeColor(altitudeFt(ac));
+        const cls = classifyAircraft(ac);
         const latlng: [number, number] = [ac.lat, ac.lon];
         const existing = markers.get(ac.hex);
 
         if (!existing) {
           const marker = L.marker(latlng, {
-            icon: planeIcon(track, color, selected),
+            icon: planeIcon(track, color, selected, cls),
             title: callsign(ac),
             keyboard: false,
           });
           marker.on("click", () => select(ac.hex));
           marker.addTo(group);
-          markers.set(ac.hex, { marker, track, color, selected });
+          markers.set(ac.hex, { marker, track, color, selected, cls });
           continue;
         }
 
         existing.marker.setLatLng(latlng);
 
-        // Only rebuild the icon when color/selection changes; rotate cheaply
-        // in place when only the heading moved.
-        if (existing.color !== color || existing.selected !== selected) {
-          existing.marker.setIcon(planeIcon(track, color, selected));
+        // Only rebuild the icon when color/selection/class changes; rotate
+        // cheaply in place when only the heading moved.
+        if (existing.color !== color || existing.selected !== selected || existing.cls !== cls) {
+          existing.marker.setIcon(planeIcon(track, color, selected, cls));
           existing.color = color;
           existing.selected = selected;
+          existing.cls = cls;
           existing.track = track;
           if (selected) existing.marker.setZIndexOffset(1000);
           else existing.marker.setZIndexOffset(0);

@@ -4,10 +4,13 @@ import SearchBar from "./components/SearchBar";
 import StatusBar from "./components/StatusBar";
 import DetailPanel from "./components/DetailPanel";
 import AircraftList from "./components/AircraftList";
+import Legend from "./components/Legend";
 import { usePolling } from "./hooks/usePolling";
+import { useUrlSync } from "./hooks/useUrlSync";
 
 export default function App() {
   usePolling();
+  useUrlSync();
   const [listOpen, setListOpen] = useState(false);
 
   return (
@@ -31,6 +34,7 @@ export default function App() {
 
       {listOpen && <AircraftList onClose={() => setListOpen(false)} />}
 
+      <Legend />
       <DetailPanel />
       <StatusBar />
     </div>

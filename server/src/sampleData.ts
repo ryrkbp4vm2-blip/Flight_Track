@@ -19,6 +19,8 @@ const aircraft = [
   { hex: "06a0f3", flight: "QID11  ", t: "C17", r: "A7-MAB", alt_baro: 35000, gs: 462, track: 128, squawk: "3320", lat: 25.27, lon: 51.61, category: "A5", type: "adsb_icao" },
   { hex: "3998b2", flight: "FNF4501", t: "RFAL", r: "4-HG", alt_baro: 26000, gs: 488, track: 60, squawk: "2710", lat: 43.55, lon: 1.37, category: "A1", type: "adsb_icao" },
   { hex: "8a02d7", flight: "IFC123 ", t: "B738", alt_baro: "ground" as const, gs: 8, track: 45, squawk: "1000", lat: 35.55, lon: 139.78, category: "A3", type: "adsb_icao" },
+  { hex: "ae6f10", flight: "DUSTOFF", t: "H60", r: "16-20801", alt_baro: 1200, gs: 120, track: 215, squawk: "5140", lat: 35.13, lon: -79.01, category: "A7", type: "adsb_icao" },
+  { hex: "3c4d22", flight: "GAM77  ", t: "EC35", alt_baro: 800, gs: 95, track: 140, squawk: "3677", lat: 48.13, lon: 11.55, category: "A7", type: "adsb_icao" },
 ];
 
 export function buildSample(): MilResponse {

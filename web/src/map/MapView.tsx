@@ -11,16 +11,37 @@ import {
 import AircraftLayer from "./AircraftLayer";
 import TrailsLayer from "./TrailsLayer";
 
-/** Pans the map when a fly-to target is set (e.g. selecting from the list). */
+/**
+ * Drives map movement from the store: explicit fly-to requests (selecting from
+ * the list / "Center on map") and continuous follow of the selected aircraft.
+ */
 function FlyController() {
   const map = useMap();
   useEffect(() => {
     let lastNonce = -1;
+    let lastFollowPos = "";
+
     const unsub = useAircraftStore.subscribe((state) => {
+      // One-shot pans (list click, "Center on map").
       const t = state.flyTarget;
       if (t && t.nonce !== lastNonce) {
         lastNonce = t.nonce;
         map.flyTo([t.lat, t.lon], Math.max(map.getZoom(), 6), { duration: 0.6 });
+        return;
+      }
+
+      // Continuous follow: keep the selected aircraft centered as it moves.
+      if (state.followSelected && state.selectedHex) {
+        const ac = state.aircraft.get(state.selectedHex);
+        if (ac && typeof ac.lat === "number" && typeof ac.lon === "number") {
+          const key = `${ac.lat.toFixed(4)},${ac.lon.toFixed(4)}`;
+          if (key !== lastFollowPos) {
+            lastFollowPos = key;
+            map.panTo([ac.lat, ac.lon], { animate: true, duration: 0.8 });
+          }
+        }
+      } else {
+        lastFollowPos = "";
       }
     });
     return unsub;

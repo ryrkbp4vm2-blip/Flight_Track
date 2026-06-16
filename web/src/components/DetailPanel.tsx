@@ -1,4 +1,5 @@
 import { useAircraftStore } from "../store/useAircraftStore";
+import { classLabel, classifyAircraft } from "../lib/classify";
 import {
   callsign,
   formatAltitude,
@@ -23,6 +24,8 @@ export default function DetailPanel() {
   const ac = useAircraftStore((s) => (selectedHex ? s.aircraft.get(selectedHex) : undefined));
   const select = useAircraftStore((s) => s.select);
   const flyTo = useAircraftStore((s) => s.flyTo);
+  const followSelected = useAircraftStore((s) => s.followSelected);
+  const toggleFollow = useAircraftStore((s) => s.toggleFollow);
 
   if (!selectedHex) return null;
 
@@ -45,6 +48,7 @@ export default function DetailPanel() {
         <span className="detail-title">{callsign(ac)}</span>
         <button className="detail-close" onClick={() => select(null)} aria-label="Close">✕</button>
       </div>
+      <div className="detail-class">{classLabel(classifyAircraft(ac))}</div>
       <div className="detail-grid">
         <Row label="Type" value={ac.t ?? "—"} />
         <Row label="Registration" value={ac.r ?? "—"} />
@@ -60,9 +64,18 @@ export default function DetailPanel() {
         )}
       </div>
       {hasPosition(ac) && (
-        <button className="detail-locate" onClick={() => flyTo(ac.lat, ac.lon)}>
-          Center on map
-        </button>
+        <div className="detail-actions">
+          <button className="detail-btn" onClick={() => flyTo(ac.lat, ac.lon)}>
+            Center
+          </button>
+          <button
+            className={`detail-btn${followSelected ? " active" : ""}`}
+            onClick={toggleFollow}
+            aria-pressed={followSelected}
+          >
+            {followSelected ? "Following ✓" : "Follow"}
+          </button>
+        </div>
       )}
     </div>
   );

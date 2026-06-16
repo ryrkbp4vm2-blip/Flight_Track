@@ -9,12 +9,17 @@ the home screen — no app stores.
 ## Features
 
 - 🌍 Full-screen dark world map (CARTO basemap) with live military aircraft
-- ✈️ Rotating plane icons colored by altitude, auto-refreshing every few seconds
-- 👆 Tap an aircraft for details: callsign, type, registration, hex, squawk,
-  altitude, vertical rate, speed, heading, position
+- ✈️ Type-aware rotating icons — fighters, heavies/tankers, helicopters and
+  drones get distinct glyphs — colored by altitude, auto-refreshing
+- 👆 Tap an aircraft for details: class, callsign, type, registration, hex,
+  squawk, altitude, vertical rate, speed, heading, position
+- 🎯 **Follow mode** keeps a selected aircraft centered as it moves
+- 🔗 **Shareable deep-links** — the selected aircraft is encoded in the URL
+  (`#sel=<hex>`) and restored on reload
 - 🔎 Search/filter by callsign, type, hex, or registration
 - 📋 Sortable list view of all tracked aircraft
 - 🛰️ Per-aircraft flight trails (selected by default, or show all)
+- 🗺️ Altitude color legend
 - 📲 Installable PWA with offline app shell
 
 ## How it works

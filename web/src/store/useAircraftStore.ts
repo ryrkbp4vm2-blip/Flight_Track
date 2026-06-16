@@ -27,12 +27,15 @@ interface AircraftState {
   sortKey: SortKey;
   sortDir: SortDir;
   showAllTrails: boolean;
+  /** When true, keep the selected aircraft centered as it moves. */
+  followSelected: boolean;
   status: Status;
   /** Map pan request; `nonce` changes each call so repeats still fire. */
   flyTarget: { lat: number; lon: number; nonce: number } | null;
 
   ingest: (resp: MilResponse, meta?: { sample?: boolean }) => void;
   select: (hex: string | null) => void;
+  toggleFollow: () => void;
   flyTo: (lat: number, lon: number) => void;
   setFilter: (text: string) => void;
   setSort: (key: SortKey) => void;
@@ -48,6 +51,7 @@ export const useAircraftStore = create<AircraftState>((set) => ({
   sortKey: "callsign",
   sortDir: "asc",
   showAllTrails: false,
+  followSelected: false,
   status: { lastUpdate: null, error: null, total: 0, sample: false },
   flyTarget: null,
 
@@ -91,7 +95,9 @@ export const useAircraftStore = create<AircraftState>((set) => ({
       };
     }),
 
-  select: (hex) => set({ selectedHex: hex }),
+  // Clearing the selection also stops following.
+  select: (hex) => set(hex === null ? { selectedHex: null, followSelected: false } : { selectedHex: hex }),
+  toggleFollow: () => set((state) => ({ followSelected: !state.followSelected })),
   flyTo: (lat, lon) =>
     set((state) => ({
       flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 },
