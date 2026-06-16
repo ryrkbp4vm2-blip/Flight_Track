@@ -13,10 +13,14 @@
     "dev:web": "npm -w web run dev",
     "build": "npm -w web run build",
     "start": "npm -w server run start",
-    "typecheck": "npm -w web run typecheck && npm -w server run typecheck"
+    "typecheck": "npm -w web run typecheck && npm -w server run typecheck",
+    "demo": "tsx scripts/render-demo.mts"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "@resvg/resvg-js": "^2.6.2",
+    "concurrently": "^9.1.0",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
   },
   "engines": {
     "node": ">=20"

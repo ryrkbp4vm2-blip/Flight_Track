@@ -6,6 +6,14 @@ the home screen — no app stores.
 
 ![status](https://img.shields.io/badge/status-MVP-blue)
 
+## Demo
+
+Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
+
+| World overview | Aircraft selected |
+| --- | --- |
+| ![overview](demo/overview.png) | ![selected](demo/selected.png) |
+
 ## Features
 
 - 🌍 Full-screen dark world map (CARTO basemap) with live military aircraft
