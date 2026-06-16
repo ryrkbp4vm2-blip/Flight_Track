@@ -7,6 +7,7 @@ import { classifyVessel, vesselName, vesselHeading, hasVesselPosition } from "..
 import { haversineNm, bearingDeg, formatDistance } from "../web/src/lib/geo.ts";
 import { icaoCountry, countryFlag } from "../web/src/lib/icaoCountry.ts";
 import { airClassAllowed, seaClassAllowed } from "../web/src/store/useMapStore.ts";
+import { newlyTrue, intersect } from "../web/src/lib/alerts.ts";
 import { callsign, altitudeFt, formatAltitude, hasPosition } from "../web/src/lib/format.ts";
 import { appendTrackPoint, MAX_TRAIL_POINTS } from "../web/src/lib/trails.ts";
 import { filterAircraft, sortAircraft } from "../web/src/store/selectors.ts";
@@ -143,4 +144,14 @@ test("class-filter predicates: empty set allows all", () => {
   assert.equal(seaClassAllowed(new Set(), "carrier"), true);
   assert.equal(seaClassAllowed(new Set(["submarine"]), "carrier"), false);
   assert.equal(seaClassAllowed(new Set(["submarine"]), "submarine"), true);
+});
+
+test("alert rule helpers: newlyTrue and intersect", () => {
+  // Only IDs present now but not before are "new".
+  assert.deepEqual(newlyTrue(new Set(["a"]), new Set(["a", "b"])).sort(), ["b"]);
+  assert.deepEqual(newlyTrue(new Set(), new Set(["x"])), ["x"]);
+  assert.deepEqual(newlyTrue(new Set(["a", "b"]), new Set(["a"])), []);
+  // Watched contacts among a set of ids.
+  assert.deepEqual(intersect(["a", "b", "c"], new Set(["b", "z"])), ["b"]);
+  assert.deepEqual(intersect(["a"], new Set()), []);
 });

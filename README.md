@@ -24,6 +24,10 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
 - 🔀 **Air / Sea / Both** layer toggle
 - 🚨 **Emergency highlighting** — aircraft squawking 7500/7600/7700 (or an ADS-B
   emergency) pulse red/orange and are surfaced in the list and status bar
+- 🔔 **Alerts & watchlist** — star contacts to watch them (gold ring on the map);
+  get toast alerts (with optional sound + browser push) when an emergency
+  squawk appears or a watched contact returns to coverage; an Alerts tab logs
+  events and holds the settings
 - 👆 Tap any contact for details (aircraft: class, callsign, type, reg, hex,
   squawk, altitude, speed, heading; vessel: type, navy, hull, MMSI, speed, course)
 - 🎯 **Follow mode** keeps a selected aircraft centered as it moves
@@ -76,6 +80,12 @@ A `SAMPLE DATA` badge appears in the status bar when this is active.
 npm test        # unit tests for classification, emergencies, vessels, filtering, trails
 npm run typecheck
 ```
+
+## Deploy (get it on your phone)
+
+See **[DEPLOY.md](./DEPLOY.md)** for one-click options (Render Blueprint via
+`render.yaml`, Railway, Fly.io, or any Docker host) and "Add to Home Screen"
+instructions. The server health check is `/api/health`.
 
 ## Production build
 
