@@ -4,6 +4,9 @@ import assert from "node:assert/strict";
 import { classifyAircraft } from "../web/src/lib/classify.ts";
 import { emergencyInfo, isEmergency } from "../web/src/lib/emergency.ts";
 import { classifyVessel, vesselName, vesselHeading, hasVesselPosition } from "../web/src/lib/vessel.ts";
+import { haversineNm, bearingDeg, formatDistance } from "../web/src/lib/geo.ts";
+import { icaoCountry, countryFlag } from "../web/src/lib/icaoCountry.ts";
+import { airClassAllowed, seaClassAllowed } from "../web/src/store/useMapStore.ts";
 import { callsign, altitudeFt, formatAltitude, hasPosition } from "../web/src/lib/format.ts";
 import { appendTrackPoint, MAX_TRAIL_POINTS } from "../web/src/lib/trails.ts";
 import { filterAircraft, sortAircraft } from "../web/src/store/selectors.ts";
@@ -93,11 +96,15 @@ test("appendTrackPoint dedupes stationary points and caps length", () => {
 test("classifyVessel and vessel helpers", () => {
   const v = (o: Partial<Vessel>): Vessel => ({ mmsi: "1", ...o });
   assert.equal(classifyVessel(v({ type: "Aircraft Carrier" })), "carrier");
+  assert.equal(classifyVessel(v({ type: "Amphibious Assault Ship" })), "amphibious");
   assert.equal(classifyVessel(v({ type: "Destroyer" })), "combatant");
   assert.equal(classifyVessel(v({ type: "Frigate" })), "combatant");
+  assert.equal(classifyVessel(v({ type: "Littoral Combat Ship" })), "combatant");
   assert.equal(classifyVessel(v({ type: "Submarine" })), "submarine");
   assert.equal(classifyVessel(v({ type: "Patrol Cutter" })), "patrol");
   assert.equal(classifyVessel(v({ type: "Replenishment Oiler" })), "support");
+  assert.equal(classifyVessel(v({ type: "Command Ship" })), "support");
+  assert.equal(classifyVessel(v({ type: "Hospital Ship" })), "support");
   assert.equal(classifyVessel(v({ type: "Tug" })), "vessel");
   assert.equal(vesselName(v({ name: "USS Cole", hull: "DDG-67" })), "USS Cole");
   assert.equal(vesselName(v({ hull: "DDG-67" })), "DDG-67");
@@ -105,4 +112,35 @@ test("classifyVessel and vessel helpers", () => {
   assert.equal(vesselHeading(v({ heading: 45, cog: 90 })), 45);
   assert.equal(hasVesselPosition(v({ lat: 1, lon: 2 })), true);
   assert.equal(hasVesselPosition(v({ lat: 1 })), false);
+});
+
+test("geo: distance, bearing, formatting", () => {
+  // 1° of longitude at the equator ≈ 60 nm.
+  assert.ok(Math.abs(haversineNm({ lat: 0, lon: 0 }, { lat: 0, lon: 1 }) - 60) < 0.2);
+  assert.equal(haversineNm({ lat: 10, lon: 20 }, { lat: 10, lon: 20 }), 0);
+  assert.ok(Math.abs(bearingDeg({ lat: 0, lon: 0 }, { lat: 1, lon: 0 }) - 0) < 0.001);
+  assert.ok(Math.abs(bearingDeg({ lat: 0, lon: 0 }, { lat: 0, lon: 1 }) - 90) < 0.001);
+  assert.match(formatDistance(60), /nm/);
+  assert.match(formatDistance(60), /km/);
+});
+
+test("icaoCountry maps hex blocks to countries/flags", () => {
+  assert.equal(icaoCountry("a00001")?.country, "United States");
+  assert.equal(icaoCountry("3c0001")?.country, "Germany");
+  assert.equal(icaoCountry("400001")?.country, "United Kingdom");
+  assert.equal(icaoCountry("780001")?.country, "China");
+  assert.equal(icaoCountry("7c0001")?.country, "Australia");
+  assert.equal(icaoCountry("c00001")?.country, "Canada");
+  assert.equal(icaoCountry("zzzzzz"), null);
+  assert.equal(countryFlag("USA"), "🇺🇸");
+  assert.equal(countryFlag(undefined), "");
+});
+
+test("class-filter predicates: empty set allows all", () => {
+  assert.equal(airClassAllowed(new Set(), "fighter"), true);
+  assert.equal(airClassAllowed(new Set(["fighter"]), "fighter"), true);
+  assert.equal(airClassAllowed(new Set(["fighter"]), "heavy"), false);
+  assert.equal(seaClassAllowed(new Set(), "carrier"), true);
+  assert.equal(seaClassAllowed(new Set(["submarine"]), "carrier"), false);
+  assert.equal(seaClassAllowed(new Set(["submarine"]), "submarine"), true);
 });
