@@ -50,6 +50,9 @@ export default function VesselDetailPanel() {
         <button className="detail-close" onClick={clearSelection} aria-label="Close">✕</button>
       </div>
       <div className="detail-class">⚓ {vesselLabel(classifyVessel(v))}</div>
+      {classifyVessel(v) === "submarine" && (
+        <div className="detail-note">AIS visible only when surfaced</div>
+      )}
       <div className="detail-grid">
         <Row label="Type" value={v.type ?? "—"} />
         <Row label="Navy" value={v.country ?? "—"} />

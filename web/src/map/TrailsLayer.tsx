@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useAircraftStore } from "../store/useAircraftStore";
+import { useMapStore } from "../store/useMapStore";
 import { COLOR_TRAIL, COLOR_TRAIL_SELECTED } from "./mapConfig";
 
 /**
@@ -18,7 +19,8 @@ export default function TrailsLayer() {
     const lines = new Map<string, L.Polyline>();
 
     function render() {
-      const { trails, selectedHex, showAllTrails } = useAircraftStore.getState();
+      const { trails, selectedHex } = useAircraftStore.getState();
+      const showAllTrails = useMapStore.getState().showAllTrails;
 
       // Which hexes get a trail this frame.
       const wanted = new Set<string>();
@@ -64,9 +66,11 @@ export default function TrailsLayer() {
 
     render();
     const unsub = useAircraftStore.subscribe(render);
+    const unsubMap = useMapStore.subscribe(render);
 
     return () => {
       unsub();
+      unsubMap();
       group.remove();
       lines.clear();
     };

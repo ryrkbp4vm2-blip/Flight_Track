@@ -2,7 +2,6 @@ import { create } from "zustand";
 import type { MilResponse, TrackedAircraft, TrackPoint } from "../../../shared/types";
 import { altitudeFt, hasPosition } from "../lib/format";
 import { appendTrackPoint } from "../lib/trails";
-import { loadPref, savePref } from "../lib/persist";
 import { useVesselStore } from "./useVesselStore";
 
 /** Drop aircraft we haven't heard from in this long (ms). */
@@ -28,7 +27,6 @@ interface AircraftState {
   filterText: string;
   sortKey: SortKey;
   sortDir: SortDir;
-  showAllTrails: boolean;
   /** When true, keep the selected aircraft centered as it moves. */
   followSelected: boolean;
   status: Status;
@@ -38,7 +36,6 @@ interface AircraftState {
   toggleFollow: () => void;
   setFilter: (text: string) => void;
   setSort: (key: SortKey) => void;
-  toggleAllTrails: () => void;
   setError: (message: string | null) => void;
 }
 
@@ -49,7 +46,6 @@ export const useAircraftStore = create<AircraftState>((set) => ({
   filterText: "",
   sortKey: "callsign",
   sortDir: "asc",
-  showAllTrails: loadPref("showAllTrails", false),
   followSelected: false,
   status: { lastUpdate: null, error: null, total: 0, sample: false },
 
@@ -110,12 +106,6 @@ export const useAircraftStore = create<AircraftState>((set) => ({
         ? { sortDir: state.sortDir === "asc" ? "desc" : "asc" }
         : { sortKey: key, sortDir: "asc" },
     ),
-  toggleAllTrails: () =>
-    set((state) => {
-      const showAllTrails = !state.showAllTrails;
-      savePref("showAllTrails", showAllTrails);
-      return { showAllTrails };
-    }),
   setError: (message) =>
     set((state) => ({ status: { ...state.status, error: message } })),
 }));

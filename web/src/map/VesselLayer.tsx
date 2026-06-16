@@ -69,7 +69,7 @@ export default function VesselLayer() {
 
         if (!existing) {
           const marker = L.marker(latlng, {
-            icon: vesselIcon(heading, color, selected, vesselSizeScale(cls)),
+            icon: vesselIcon(heading, color, selected, vesselSizeScale(cls), cls),
             title: vesselName(v),
             keyboard: false,
           });
@@ -81,7 +81,7 @@ export default function VesselLayer() {
 
         existing.marker.setLatLng(latlng);
         if (existing.color !== color || existing.selected !== selected) {
-          existing.marker.setIcon(vesselIcon(heading, color, selected, vesselSizeScale(cls)));
+          existing.marker.setIcon(vesselIcon(heading, color, selected, vesselSizeScale(cls), cls));
           existing.color = color;
           existing.selected = selected;
           existing.heading = heading;
@@ -92,10 +92,14 @@ export default function VesselLayer() {
         }
       }
 
-      // Trails: selected vessel always; all when aircraft "show all" is on is
-      // aircraft-specific, so vessels just draw the selected one here.
+      // Trails: the selected vessel always; every vessel when "show all" is on.
+      const showAllTrails = useMapStore.getState().showAllTrails;
       const wanted = new Set<string>();
-      if (selectedMmsi && (trails.get(selectedMmsi)?.length ?? 0) > 1) wanted.add(selectedMmsi);
+      if (showAllTrails) {
+        for (const v of withPos) if ((trails.get(v.mmsi)?.length ?? 0) > 1) wanted.add(v.mmsi);
+      } else if (selectedMmsi && (trails.get(selectedMmsi)?.length ?? 0) > 1) {
+        wanted.add(selectedMmsi);
+      }
       for (const [mmsi, line] of lines) {
         if (!wanted.has(mmsi)) {
           trailGroup.removeLayer(line);
@@ -104,19 +108,21 @@ export default function VesselLayer() {
       }
       for (const mmsi of wanted) {
         const pts = trails.get(mmsi)!.map((p) => [p.lat, p.lon]) as [number, number][];
+        const sel = mmsi === selectedMmsi;
+        const style = {
+          color: sel ? COLOR_TRAIL_SELECTED : COLOR_TRAIL,
+          weight: sel ? 3 : 1.5,
+          opacity: sel ? 0.85 : 0.45,
+          dashArray: "4 4",
+        };
         const existing = lines.get(mmsi);
-        if (existing) existing.setLatLngs(pts);
-        else {
+        if (existing) {
+          existing.setLatLngs(pts);
+          existing.setStyle(style);
+        } else {
           lines.set(
             mmsi,
-            L.polyline(pts, {
-              renderer,
-              color: mmsi === selectedMmsi ? COLOR_TRAIL_SELECTED : COLOR_TRAIL,
-              weight: 3,
-              opacity: 0.85,
-              dashArray: "4 4",
-              interactive: false,
-            }).addTo(trailGroup),
+            L.polyline(pts, { renderer, interactive: false, ...style }).addTo(trailGroup),
           );
         }
       }

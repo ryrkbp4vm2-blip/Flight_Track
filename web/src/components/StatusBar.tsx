@@ -11,8 +11,8 @@ const STALE_WARN_MS = 20_000;
 export default function StatusBar() {
   const status = useAircraftStore((s) => s.status);
   const total = useAircraftStore((s) => s.aircraft.size);
-  const showAllTrails = useAircraftStore((s) => s.showAllTrails);
-  const toggleAllTrails = useAircraftStore((s) => s.toggleAllTrails);
+  const showAllTrails = useMapStore((s) => s.showAllTrails);
+  const toggleAllTrails = useMapStore((s) => s.toggleAllTrails);
   const emergencies = useAircraftStore(
     (s) => [...s.aircraft.values()].filter(isEmergency).length,
   );

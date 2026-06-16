@@ -2,6 +2,7 @@ import type { Vessel } from "../../../shared/types";
 
 export type VesselClass =
   | "carrier"
+  | "amphibious"
   | "combatant"
   | "submarine"
   | "patrol"
@@ -10,6 +11,7 @@ export type VesselClass =
 
 const LABEL: Record<VesselClass, string> = {
   carrier: "Aircraft carrier",
+  amphibious: "Amphibious assault",
   combatant: "Surface combatant",
   submarine: "Submarine",
   patrol: "Patrol / cutter",
@@ -19,6 +21,7 @@ const LABEL: Record<VesselClass, string> = {
 
 const COLOR: Record<VesselClass, string> = {
   carrier: "#f3a0ff",
+  amphibious: "#ff9e7a",
   combatant: "#4dd0e1",
   submarine: "#9fb2bd",
   patrol: "#aed581",
@@ -29,6 +32,7 @@ const COLOR: Record<VesselClass, string> = {
 /** Relative marker size per class (carriers read as the largest). */
 const SIZE_SCALE: Record<VesselClass, number> = {
   carrier: 1.35,
+  amphibious: 1.2,
   combatant: 1.05,
   submarine: 1.0,
   patrol: 0.95,
@@ -39,12 +43,14 @@ const SIZE_SCALE: Record<VesselClass, number> = {
 export function classifyVessel(v: Vessel): VesselClass {
   const t = (v.type ?? "").toLowerCase();
   if (t.includes("carrier")) return "carrier";
+  if (t.includes("amphibious")) return "amphibious";
   if (t.includes("submarine")) return "submarine";
   if (
     t.includes("destroyer") ||
     t.includes("cruiser") ||
     t.includes("frigate") ||
-    t.includes("corvette")
+    t.includes("corvette") ||
+    t.includes("littoral")
   ) {
     return "combatant";
   }
@@ -54,7 +60,9 @@ export function classifyVessel(v: Vessel): VesselClass {
     t.includes("replenishment") ||
     t.includes("support") ||
     t.includes("auxiliary") ||
-    t.includes("supply")
+    t.includes("supply") ||
+    t.includes("command") ||
+    t.includes("hospital")
   ) {
     return "support";
   }
