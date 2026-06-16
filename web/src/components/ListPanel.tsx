@@ -1,15 +1,17 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAircraftStore, type SortKey } from "../store/useAircraftStore";
 import { useVesselStore, type VesselSortKey } from "../store/useVesselStore";
 import { useMapStore, airClassAllowed, seaClassAllowed } from "../store/useMapStore";
+import { useAlertsStore } from "../store/useAlertsStore";
 import { filterAircraft, sortAircraft } from "../store/selectors";
 import { classifyAircraft } from "../lib/classify";
 import { classifyVessel, vesselMatches, vesselName } from "../lib/vessel";
 import ListItem from "./ListItem";
 import VesselListItem from "./VesselListItem";
 import StatsView from "./StatsView";
+import AlertsView from "./AlertsView";
 
-type Tab = "air" | "sea" | "stats";
+export type Tab = "air" | "sea" | "stats" | "alerts";
 
 const AIR_COLS: { key: SortKey; label: string }[] = [
   { key: "callsign", label: "Callsign" },
@@ -24,8 +26,16 @@ const SEA_COLS: { key: VesselSortKey; label: string }[] = [
   { key: "country", label: "Navy" },
 ];
 
-export default function ListPanel({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<Tab>("air");
+export default function ListPanel({
+  tab,
+  onTab,
+  onClose,
+}: {
+  tab: Tab;
+  onTab: (t: Tab) => void;
+  onClose: () => void;
+}) {
+  const unread = useAlertsStore((s) => s.unread);
 
   // Aircraft data
   const aircraft = useAircraftStore((s) => s.aircraft);
@@ -81,20 +91,23 @@ export default function ListPanel({ onClose }: { onClose: () => void }) {
     <div className="list-panel">
       <div className="list-header">
         <div className="list-tabs">
-          <button className={tab === "air" ? "active" : ""} onClick={() => setTab("air")}>
+          <button className={tab === "air" ? "active" : ""} onClick={() => onTab("air")}>
             ✈ Aircraft <span className="tab-count">{airRows.length}</span>
           </button>
-          <button className={tab === "sea" ? "active" : ""} onClick={() => setTab("sea")}>
+          <button className={tab === "sea" ? "active" : ""} onClick={() => onTab("sea")}>
             ⚓ Vessels <span className="tab-count">{seaRows.length}</span>
           </button>
-          <button className={tab === "stats" ? "active" : ""} onClick={() => setTab("stats")}>
+          <button className={tab === "stats" ? "active" : ""} onClick={() => onTab("stats")}>
             ▦ Stats
+          </button>
+          <button className={tab === "alerts" ? "active" : ""} onClick={() => onTab("alerts")}>
+            🔔 Alerts{unread > 0 && <span className="tab-count alert">{unread}</span>}
           </button>
         </div>
         <button className="list-close" onClick={onClose} aria-label="Close list">✕</button>
       </div>
 
-      {tab !== "stats" && (
+      {(tab === "air" || tab === "sea") && (
       <div className="list-cols">
         <span className="li-dot" />
         {tab === "air"
@@ -124,6 +137,8 @@ export default function ListPanel({ onClose }: { onClose: () => void }) {
       <div className="list-scroll">
         {tab === "stats" ? (
           <StatsView />
+        ) : tab === "alerts" ? (
+          <AlertsView />
         ) : tab === "air" ? (
           airRows.length === 0 ? (
             <p className="list-empty">No aircraft match.</p>

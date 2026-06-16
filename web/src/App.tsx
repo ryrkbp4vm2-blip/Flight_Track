@@ -4,12 +4,13 @@ import SearchBar from "./components/SearchBar";
 import StatusBar from "./components/StatusBar";
 import DetailPanel from "./components/DetailPanel";
 import VesselDetailPanel from "./components/VesselDetailPanel";
-import ListPanel from "./components/ListPanel";
+import ListPanel, { type Tab } from "./components/ListPanel";
 import LayerToggle from "./components/LayerToggle";
 import MapControls from "./components/MapControls";
 import FilterChips from "./components/FilterChips";
 import AlertToasts from "./components/AlertToasts";
 import Legend from "./components/Legend";
+import { useAlertsStore } from "./store/useAlertsStore";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
 import { useKeyboard } from "./hooks/useKeyboard";
@@ -21,6 +22,15 @@ export default function App() {
   useKeyboard();
   useAlerts();
   const [listOpen, setListOpen] = useState(false);
+  const [listTab, setListTab] = useState<Tab>("air");
+  const unread = useAlertsStore((s) => s.unread);
+  const markRead = useAlertsStore((s) => s.markRead);
+
+  function openAlerts() {
+    setListTab("alerts");
+    setListOpen(true);
+    markRead();
+  }
 
   return (
     <div className="app">
@@ -33,9 +43,17 @@ export default function App() {
         </div>
         <SearchBar />
         <button
+          className={`list-toggle bell${unread > 0 ? " has-unread" : ""}`}
+          onClick={openAlerts}
+          aria-label="Alerts"
+        >
+          🔔
+          {unread > 0 && <span className="bell-badge">{unread > 9 ? "9+" : unread}</span>}
+        </button>
+        <button
           className={`list-toggle${listOpen ? " active" : ""}`}
           onClick={() => setListOpen((v) => !v)}
-          aria-label="Toggle aircraft list"
+          aria-label="Toggle list"
         >
           ☰
         </button>
@@ -44,7 +62,16 @@ export default function App() {
       <FilterChips />
       <AlertToasts />
 
-      {listOpen && <ListPanel onClose={() => setListOpen(false)} />}
+      {listOpen && (
+        <ListPanel
+          tab={listTab}
+          onTab={(t) => {
+            setListTab(t);
+            if (t === "alerts") markRead();
+          }}
+          onClose={() => setListOpen(false)}
+        />
+      )}
 
       <LayerToggle />
       <MapControls />
