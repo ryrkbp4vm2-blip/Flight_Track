@@ -16,17 +16,22 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
 
 ## Features
 
-- 🌍 Full-screen dark world map (CARTO basemap) with live military aircraft
-- ✈️ Type-aware rotating icons — fighters, heavies/tankers, helicopters and
+- 🌍 Full-screen dark world map (CARTO basemap) with live military **aircraft and naval vessels**
+- ✈️ Type-aware aircraft icons — fighters, heavies/tankers, helicopters and
   drones get distinct glyphs — colored by altitude, auto-refreshing
-- 👆 Tap an aircraft for details: class, callsign, type, registration, hex,
-  squawk, altitude, vertical rate, speed, heading, position
+- ⚓ **Military vessel tracking** — carriers, destroyers, cruisers, frigates,
+  submarines, patrol and support ships as rotating hull glyphs colored by class
+- 🔀 **Air / Sea / Both** layer toggle
+- 🚨 **Emergency highlighting** — aircraft squawking 7500/7600/7700 (or an ADS-B
+  emergency) pulse red/orange and are surfaced in the list and status bar
+- 👆 Tap any contact for details (aircraft: class, callsign, type, reg, hex,
+  squawk, altitude, speed, heading; vessel: type, navy, hull, MMSI, speed, course)
 - 🎯 **Follow mode** keeps a selected aircraft centered as it moves
 - 🔗 **Shareable deep-links** — the selected aircraft is encoded in the URL
   (`#sel=<hex>`) and restored on reload
-- 🔎 Search/filter by callsign, type, hex, or registration
-- 📋 Sortable list view of all tracked aircraft
-- 🛰️ Per-aircraft flight trails (selected by default, or show all)
+- 🔎 Search/filter across both aircraft and vessels
+- 📋 Sortable, tabbed list view (Aircraft | Vessels)
+- 🛰️ Flight/voyage trails for the selected contact (or all aircraft trails)
 - 🗺️ Altitude color legend
 - 📲 Installable PWA with offline app shell
 
@@ -78,13 +83,24 @@ Open http://localhost:3001. On a phone (same network) use "Add to Home Screen".
 
 | Variable           | Default                                  | Purpose                              |
 | ------------------ | ---------------------------------------- | ------------------------------------ |
-| `PORT`             | `3001`                                   | Server port                          |
-| `UPSTREAM_URL`     | `https://api.airplanes.live/v2/mil/`     | Aircraft feed (ADS-B Exchange v2)    |
-| `POLL_INTERVAL_MS` | `2000`                                   | Upstream poll interval               |
-| `USE_SAMPLE_DATA`  | _(off)_ set `1`                          | Serve bundled sample data on failure |
+| `PORT`                 | `3001`                                   | Server port                              |
+| `UPSTREAM_URL`         | `https://api.airplanes.live/v2/mil/`     | Aircraft feed (ADS-B Exchange v2)        |
+| `VESSELS_UPSTREAM_URL` | _(unset)_                                | Live AIS vessel feed (see note below)    |
+| `POLL_INTERVAL_MS`     | `2000`                                   | Upstream poll interval                   |
+| `USE_SAMPLE_DATA`      | _(off)_ set `1`                          | Serve bundled aircraft sample on failure |
 
-The upstream is swappable for any ADS-B Exchange v2-compatible feed (e.g.
-adsb.fi) via `UPSTREAM_URL`.
+The aircraft upstream is swappable for any ADS-B Exchange v2-compatible feed
+(e.g. adsb.fi) via `UPSTREAM_URL`.
+
+### A note on vessel data
+
+Unlike military aircraft (airplanes.live offers a clean `/v2/mil` feed), there
+is **no free "military vessels only" feed** — warships routinely disable AIS, so
+live coverage is sparse. By default the server therefore serves a **curated set
+of notable navy vessels** (carriers, destroyers, subs, etc.) with simulated
+movement, so the sea layer is always demonstrable. Point `VESSELS_UPSTREAM_URL`
+at any source returning `{ "vessels": [ ... ] }` (AIS gateway, your own
+aggregator) to show real positions.
 
 ## Project layout
 
