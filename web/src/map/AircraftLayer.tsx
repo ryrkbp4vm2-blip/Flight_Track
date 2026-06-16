@@ -3,6 +3,7 @@ import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useAircraftStore } from "../store/useAircraftStore";
 import { useMapStore, showAir, airClassAllowed } from "../store/useMapStore";
+import { useAlertsStore } from "../store/useAlertsStore";
 import { filterAircraft } from "../store/selectors";
 import { altitudeFt, callsign, hasPosition } from "../lib/format";
 import { classifyAircraft, type AircraftClass } from "../lib/classify";
@@ -18,6 +19,7 @@ interface MarkerRec {
   selected: boolean;
   cls: AircraftClass;
   em: EmergencySeverity | null;
+  watched: boolean;
 }
 
 /**
@@ -35,6 +37,7 @@ export default function AircraftLayer() {
     function render() {
       const { aircraft, selectedHex, filterText, select } = useAircraftStore.getState();
       const { activeLayers, airClassFilter } = useMapStore.getState();
+      const watchedAir = useAlertsStore.getState().watchedAir;
 
       // Hidden when the layer toggle is set to sea-only.
       if (!showAir(activeLayers)) {
@@ -73,19 +76,20 @@ export default function AircraftLayer() {
             ? COLOR_SELECTED
             : altitudeColor(altitudeFt(ac));
         const cls = classifyAircraft(ac);
+        const watched = watchedAir.has(ac.hex);
         const latlng: [number, number] = [ac.lat, ac.lon];
         const existing = markers.get(ac.hex);
 
         if (!existing) {
           const marker = L.marker(latlng, {
-            icon: planeIcon(track, color, selected, cls, em),
+            icon: planeIcon(track, color, selected, cls, em, watched),
             title: callsign(ac),
             keyboard: false,
-            zIndexOffset: em ? 800 : 0,
+            zIndexOffset: em ? 800 : watched ? 400 : 0,
           });
           marker.on("click", () => select(ac.hex));
           marker.addTo(group);
-          markers.set(ac.hex, { marker, track, color, selected, cls, em });
+          markers.set(ac.hex, { marker, track, color, selected, cls, em, watched });
           continue;
         }
 
@@ -97,16 +101,17 @@ export default function AircraftLayer() {
           existing.color !== color ||
           existing.selected !== selected ||
           existing.cls !== cls ||
-          existing.em !== em
+          existing.em !== em ||
+          existing.watched !== watched
         ) {
-          existing.marker.setIcon(planeIcon(track, color, selected, cls, em));
+          existing.marker.setIcon(planeIcon(track, color, selected, cls, em, watched));
           existing.color = color;
           existing.selected = selected;
           existing.cls = cls;
           existing.em = em;
+          existing.watched = watched;
           existing.track = track;
-          if (selected) existing.marker.setZIndexOffset(1000);
-          else existing.marker.setZIndexOffset(0);
+          existing.marker.setZIndexOffset(selected ? 1000 : em ? 800 : watched ? 400 : 0);
         } else if (Math.abs(existing.track - track) >= 2) {
           rotateMarkerEl(existing.marker, track, selected ? 1.25 : 1);
           existing.track = track;
@@ -117,10 +122,12 @@ export default function AircraftLayer() {
     render();
     const unsub = useAircraftStore.subscribe(render);
     const unsubMap = useMapStore.subscribe(render);
+    const unsubAlerts = useAlertsStore.subscribe(render);
 
     return () => {
       unsub();
       unsubMap();
+      unsubAlerts();
       group.remove();
       markers.clear();
     };

@@ -1,5 +1,6 @@
 import { useAircraftStore } from "../store/useAircraftStore";
 import { useMapStore } from "../store/useMapStore";
+import { useAlertsStore } from "../store/useAlertsStore";
 import { classLabel, classifyAircraft } from "../lib/classify";
 import { emergencyInfo } from "../lib/emergency";
 import { icaoCountry } from "../lib/icaoCountry";
@@ -29,6 +30,8 @@ export default function DetailPanel() {
   const flyTo = useMapStore((s) => s.flyTo);
   const followSelected = useAircraftStore((s) => s.followSelected);
   const toggleFollow = useAircraftStore((s) => s.toggleFollow);
+  const watchedAir = useAlertsStore((s) => s.watchedAir);
+  const toggleWatchAir = useAlertsStore((s) => s.toggleWatchAir);
 
   if (!selectedHex) return null;
 
@@ -49,7 +52,17 @@ export default function DetailPanel() {
     <div className="detail-panel">
       <div className="detail-header">
         <span className="detail-title">{callsign(ac)}</span>
-        <button className="detail-close" onClick={() => select(null)} aria-label="Close">✕</button>
+        <div className="detail-header-actions">
+          <button
+            className={`detail-star${watchedAir.has(ac.hex) ? " on" : ""}`}
+            onClick={() => toggleWatchAir(ac.hex)}
+            aria-pressed={watchedAir.has(ac.hex)}
+            title={watchedAir.has(ac.hex) ? "Remove from watchlist" : "Add to watchlist"}
+          >
+            {watchedAir.has(ac.hex) ? "★" : "☆"}
+          </button>
+          <button className="detail-close" onClick={() => select(null)} aria-label="Close">✕</button>
+        </div>
       </div>
       <div className="detail-class">{classLabel(classifyAircraft(ac))}</div>
       {(() => {

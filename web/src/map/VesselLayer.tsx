@@ -4,6 +4,7 @@ import L from "leaflet";
 import { useVesselStore } from "../store/useVesselStore";
 import { useAircraftStore } from "../store/useAircraftStore";
 import { useMapStore, showSea, seaClassAllowed } from "../store/useMapStore";
+import { useAlertsStore } from "../store/useAlertsStore";
 import {
   classifyVessel,
   hasVesselPosition,
@@ -21,6 +22,7 @@ interface Rec {
   heading: number;
   color: string;
   selected: boolean;
+  watched: boolean;
 }
 
 /** Imperative vessel markers + trails, mirroring AircraftLayer. */
@@ -48,6 +50,7 @@ export default function VesselLayer() {
 
       const filterText = useAircraftStore.getState().filterText;
       const seaClassFilter = useMapStore.getState().seaClassFilter;
+      const watchedSea = useAlertsStore.getState().watchedSea;
       const withPos = [...vessels.values()]
         .filter(hasVesselPosition)
         .filter((v) => vesselMatches(v, filterText))
@@ -66,28 +69,31 @@ export default function VesselLayer() {
         const selected = v.mmsi === selectedMmsi;
         const heading = vesselHeading(v);
         const color = selected ? COLOR_SELECTED : vesselColor(cls);
+        const watched = watchedSea.has(v.mmsi);
         const latlng: [number, number] = [v.lat, v.lon];
         const existing = markers.get(v.mmsi);
 
         if (!existing) {
           const marker = L.marker(latlng, {
-            icon: vesselIcon(heading, color, selected, vesselSizeScale(cls), cls),
+            icon: vesselIcon(heading, color, selected, vesselSizeScale(cls), cls, watched),
             title: vesselName(v),
             keyboard: false,
+            zIndexOffset: watched ? 400 : 0,
           });
           marker.on("click", () => select(v.mmsi));
           marker.addTo(markerGroup);
-          markers.set(v.mmsi, { marker, heading, color, selected });
+          markers.set(v.mmsi, { marker, heading, color, selected, watched });
           continue;
         }
 
         existing.marker.setLatLng(latlng);
-        if (existing.color !== color || existing.selected !== selected) {
-          existing.marker.setIcon(vesselIcon(heading, color, selected, vesselSizeScale(cls), cls));
+        if (existing.color !== color || existing.selected !== selected || existing.watched !== watched) {
+          existing.marker.setIcon(vesselIcon(heading, color, selected, vesselSizeScale(cls), cls, watched));
           existing.color = color;
           existing.selected = selected;
+          existing.watched = watched;
           existing.heading = heading;
-          existing.marker.setZIndexOffset(selected ? 1000 : 0);
+          existing.marker.setZIndexOffset(selected ? 1000 : watched ? 400 : 0);
         } else if (Math.abs(existing.heading - heading) >= 2) {
           rotateVesselEl(existing.marker, heading, (selected ? 1.3 : 1) * vesselSizeScale(cls));
           existing.heading = heading;
@@ -134,11 +140,13 @@ export default function VesselLayer() {
     const unsubV = useVesselStore.subscribe(render);
     const unsubM = useMapStore.subscribe(render);
     const unsubA = useAircraftStore.subscribe(render);
+    const unsubAl = useAlertsStore.subscribe(render);
 
     return () => {
       unsubV();
       unsubM();
       unsubA();
+      unsubAl();
       trailGroup.remove();
       markerGroup.remove();
       markers.clear();

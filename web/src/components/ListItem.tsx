@@ -1,6 +1,7 @@
 import type { TrackedAircraft } from "../../../shared/types";
 import { useAircraftStore } from "../store/useAircraftStore";
 import { useMapStore } from "../store/useMapStore";
+import { useAlertsStore } from "../store/useAlertsStore";
 import { altitudeColor, COLOR_EMERGENCY, COLOR_WARNING } from "../map/mapConfig";
 import { emergencyInfo } from "../lib/emergency";
 import {
@@ -15,6 +16,7 @@ export default function ListItem({ ac }: { ac: TrackedAircraft }) {
   const selectedHex = useAircraftStore((s) => s.selectedHex);
   const select = useAircraftStore((s) => s.select);
   const flyTo = useMapStore((s) => s.flyTo);
+  const watched = useAlertsStore((s) => s.watchedAir.has(ac.hex));
   const selected = ac.hex === selectedHex;
   const em = emergencyInfo(ac);
   const dotColor = em
@@ -35,6 +37,7 @@ export default function ListItem({ ac }: { ac: TrackedAircraft }) {
     >
       <span className={`li-dot${em ? " pulsing" : ""}`} style={{ background: dotColor }} />
       <span className="li-callsign">
+        {watched && <span className="li-star">★</span>}
         {callsign(ac)}
         {em && <span className="li-emflag">{em.code}</span>}
       </span>

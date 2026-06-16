@@ -41,14 +41,17 @@ export function vesselIcon(
   selected: boolean,
   sizeScale: number,
   cls: VesselClass,
+  watched = false,
 ): L.DivIcon {
   const scale = (selected ? 1.3 : 1) * sizeScale;
   const stroke = selected ? "#fff" : "rgba(0,0,0,0.55)";
+  const ring = watched ? `<span class="watch-ring"></span>` : "";
   return L.divIcon({
     className: "vessel-marker",
     iconSize: [SIZE, SIZE],
     iconAnchor: [SIZE / 2, SIZE / 2],
     html:
+      ring +
       `<div class="vessel-rot" style="transform:rotate(${Math.round(heading)}deg) scale(${scale})">` +
       `<svg viewBox="0 0 24 24" width="${SIZE}" height="${SIZE}">` +
       glyphSvg(cls, color, stroke) +

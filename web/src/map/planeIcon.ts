@@ -46,18 +46,20 @@ export function planeIcon(
   selected: boolean,
   cls: AircraftClass,
   emergency: EmergencySeverity | null = null,
+  watched = false,
 ): L.DivIcon {
   const scale = selected ? 1.25 : 1;
   // A pulsing halo behind the glyph signals an emergency squawk.
-  const halo = emergency
-    ? `<span class="plane-pulse ${emergency}"></span>`
-    : "";
+  const halo = emergency ? `<span class="plane-pulse ${emergency}"></span>` : "";
+  // A steady ring marks a watchlisted contact.
+  const ring = watched ? `<span class="watch-ring"></span>` : "";
   return L.divIcon({
     className: `plane-marker${emergency ? " has-emergency" : ""}`,
     iconSize: [SIZE, SIZE],
     iconAnchor: [SIZE / 2, SIZE / 2],
     html:
       halo +
+      ring +
       `<div class="plane-rot" style="transform:rotate(${Math.round(track)}deg) scale(${scale})">` +
       innerSvg(cls, color, selected) +
       `</div>`,

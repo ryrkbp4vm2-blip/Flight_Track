@@ -109,6 +109,20 @@ body {
   background: rgba(255, 158, 44, 0.5);
 }
 
+/* Steady ring marking a watchlisted contact. */
+.watch-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #ffd23f;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  box-shadow: 0 0 4px rgba(255, 210, 63, 0.6);
+}
+
 @keyframes plane-pulse {
   0% {
     transform: translate(-50%, -50%) scale(0.6);
@@ -297,6 +311,11 @@ body {
 .list-item.emergency .li-callsign {
   color: #ff6b6b;
 }
+.li-star {
+  color: #ffd23f;
+  margin-right: 4px;
+  font-size: 11px;
+}
 .li-emflag {
   margin-left: 6px;
   font-size: 10px;
@@ -383,6 +402,24 @@ body {
   color: var(--text-dim);
   font-size: 16px;
   cursor: pointer;
+}
+
+.detail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detail-star {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.detail-star.on {
+  color: #ffd23f;
 }
 
 .detail-grid {

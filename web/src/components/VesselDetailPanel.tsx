@@ -1,5 +1,6 @@
 import { useVesselStore } from "../store/useVesselStore";
 import { useMapStore } from "../store/useMapStore";
+import { useAlertsStore } from "../store/useAlertsStore";
 import {
   classifyVessel,
   hasVesselPosition,
@@ -23,6 +24,8 @@ export default function VesselDetailPanel() {
   const v = useVesselStore((s) => (selectedMmsi ? s.vessels.get(selectedMmsi) : undefined));
   const clearSelection = useVesselStore((s) => s.clearSelection);
   const flyTo = useMapStore((s) => s.flyTo);
+  const watchedSea = useAlertsStore((s) => s.watchedSea);
+  const toggleWatchSea = useAlertsStore((s) => s.toggleWatchSea);
 
   if (!selectedMmsi) return null;
 
@@ -48,7 +51,17 @@ export default function VesselDetailPanel() {
     <div className="detail-panel">
       <div className="detail-header">
         <span className="detail-title sea">{vesselName(v)}</span>
-        <button className="detail-close" onClick={clearSelection} aria-label="Close">✕</button>
+        <div className="detail-header-actions">
+          <button
+            className={`detail-star${watchedSea.has(v.mmsi) ? " on" : ""}`}
+            onClick={() => toggleWatchSea(v.mmsi)}
+            aria-pressed={watchedSea.has(v.mmsi)}
+            title={watchedSea.has(v.mmsi) ? "Remove from watchlist" : "Add to watchlist"}
+          >
+            {watchedSea.has(v.mmsi) ? "★" : "☆"}
+          </button>
+          <button className="detail-close" onClick={clearSelection} aria-label="Close">✕</button>
+        </div>
       </div>
       <div className="detail-class">⚓ {vesselLabel(classifyVessel(v))}</div>
       {classifyVessel(v) === "submarine" && (
