@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAircraftStore } from "../store/useAircraftStore";
 import { formatAge } from "../lib/format";
+import { isEmergency } from "../lib/emergency";
 
 /** Show a "stale" warning once data is older than this. */
 const STALE_WARN_MS = 20_000;
@@ -10,6 +11,10 @@ export default function StatusBar() {
   const total = useAircraftStore((s) => s.aircraft.size);
   const showAllTrails = useAircraftStore((s) => s.showAllTrails);
   const toggleAllTrails = useAircraftStore((s) => s.toggleAllTrails);
+  const emergencies = useAircraftStore(
+    (s) => [...s.aircraft.values()].filter(isEmergency).length,
+  );
+  const setFilter = useAircraftStore((s) => s.setFilter);
 
   // Re-render every second so the "age" label stays live.
   const [, tick] = useState(0);
@@ -33,6 +38,15 @@ export default function StatusBar() {
             ? "connecting…"
             : `updated ${formatAge(age)}`}
       </span>
+      {emergencies > 0 && (
+        <button
+          className="status-emergency"
+          onClick={() => setFilter("emergency")}
+          title="Show aircraft squawking an emergency"
+        >
+          ⚠ {emergencies} emergency{emergencies > 1 ? " events" : ""}
+        </button>
+      )}
       {status.sample && <span className="status-badge">SAMPLE DATA</span>}
       <button
         className={`status-toggle${showAllTrails ? " on" : ""}`}

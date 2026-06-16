@@ -1,6 +1,7 @@
 import type { TrackedAircraft } from "../../../shared/types";
 import { useAircraftStore } from "../store/useAircraftStore";
-import { altitudeColor } from "../map/mapConfig";
+import { altitudeColor, COLOR_EMERGENCY, COLOR_WARNING } from "../map/mapConfig";
+import { emergencyInfo } from "../lib/emergency";
 import {
   altitudeFt,
   callsign,
@@ -14,6 +15,12 @@ export default function ListItem({ ac }: { ac: TrackedAircraft }) {
   const select = useAircraftStore((s) => s.select);
   const flyTo = useAircraftStore((s) => s.flyTo);
   const selected = ac.hex === selectedHex;
+  const em = emergencyInfo(ac);
+  const dotColor = em
+    ? em.severity === "critical"
+      ? COLOR_EMERGENCY
+      : COLOR_WARNING
+    : altitudeColor(altitudeFt(ac));
 
   function onClick() {
     select(ac.hex);
@@ -21,9 +28,15 @@ export default function ListItem({ ac }: { ac: TrackedAircraft }) {
   }
 
   return (
-    <button className={`list-item${selected ? " selected" : ""}`} onClick={onClick}>
-      <span className="li-dot" style={{ background: altitudeColor(altitudeFt(ac)) }} />
-      <span className="li-callsign">{callsign(ac)}</span>
+    <button
+      className={`list-item${selected ? " selected" : ""}${em ? " emergency" : ""}`}
+      onClick={onClick}
+    >
+      <span className={`li-dot${em ? " pulsing" : ""}`} style={{ background: dotColor }} />
+      <span className="li-callsign">
+        {callsign(ac)}
+        {em && <span className="li-emflag">{em.code}</span>}
+      </span>
       <span className="li-type">{ac.t ?? "—"}</span>
       <span className="li-alt">{formatAltitude(ac)}</span>
       <span className="li-spd">{formatSpeed(ac)}</span>

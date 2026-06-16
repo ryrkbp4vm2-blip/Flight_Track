@@ -1,17 +1,24 @@
 import type { Aircraft, TrackedAircraft } from "../../../shared/types";
 import { altitudeFt, callsign } from "../lib/format";
+import { isEmergency } from "../lib/emergency";
 import type { SortDir, SortKey } from "./useAircraftStore";
 
-/** Filter aircraft by a free-text query over callsign, type, hex, registration. */
+/**
+ * Filter aircraft by a free-text query over callsign, type, hex, registration,
+ * and squawk. The reserved word "emergency" filters to aircraft squawking an
+ * emergency.
+ */
 export function filterAircraft<T extends Aircraft>(list: T[], filterText: string): T[] {
   const q = filterText.trim().toLowerCase();
   if (!q) return list;
+  if (q === "emergency") return list.filter(isEmergency);
   return list.filter((ac) => {
     return (
       callsign(ac).toLowerCase().includes(q) ||
       ac.hex.toLowerCase().includes(q) ||
       (ac.t?.toLowerCase().includes(q) ?? false) ||
-      (ac.r?.toLowerCase().includes(q) ?? false)
+      (ac.r?.toLowerCase().includes(q) ?? false) ||
+      (ac.squawk?.includes(q) ?? false)
     );
   });
 }

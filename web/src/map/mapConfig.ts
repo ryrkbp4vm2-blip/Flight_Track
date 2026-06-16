@@ -19,6 +19,8 @@ export const COLOR_SELECTED = "#ffd23f";
 export const COLOR_GROUND = "#7a8794";
 export const COLOR_TRAIL = "#3a8fb0";
 export const COLOR_TRAIL_SELECTED = "#ffd23f";
+export const COLOR_EMERGENCY = "#ff3b3b";
+export const COLOR_WARNING = "#ff9e2c";
 
 /**
  * Color by altitude band (feet) — low = warm, high = cool. Used to tint markers

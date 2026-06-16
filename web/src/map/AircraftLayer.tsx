@@ -5,7 +5,9 @@ import { useAircraftStore } from "../store/useAircraftStore";
 import { filterAircraft } from "../store/selectors";
 import { altitudeFt, callsign, hasPosition } from "../lib/format";
 import { classifyAircraft, type AircraftClass } from "../lib/classify";
-import { COLOR_SELECTED, altitudeColor } from "./mapConfig";
+import { emergencyInfo } from "../lib/emergency";
+import type { EmergencySeverity } from "../lib/emergency";
+import { COLOR_EMERGENCY, COLOR_SELECTED, COLOR_WARNING, altitudeColor } from "./mapConfig";
 import { planeIcon, rotateMarkerEl } from "./planeIcon";
 
 interface MarkerRec {
@@ -14,6 +16,7 @@ interface MarkerRec {
   color: string;
   selected: boolean;
   cls: AircraftClass;
+  em: EmergencySeverity | null;
 }
 
 /**
@@ -48,32 +51,46 @@ export default function AircraftLayer() {
       for (const ac of visible) {
         const track = typeof ac.track === "number" ? ac.track : 0;
         const selected = ac.hex === selectedHex;
-        const color = selected ? COLOR_SELECTED : altitudeColor(altitudeFt(ac));
+        const em = emergencyInfo(ac)?.severity ?? null;
+        const color = em
+          ? em === "critical"
+            ? COLOR_EMERGENCY
+            : COLOR_WARNING
+          : selected
+            ? COLOR_SELECTED
+            : altitudeColor(altitudeFt(ac));
         const cls = classifyAircraft(ac);
         const latlng: [number, number] = [ac.lat, ac.lon];
         const existing = markers.get(ac.hex);
 
         if (!existing) {
           const marker = L.marker(latlng, {
-            icon: planeIcon(track, color, selected, cls),
+            icon: planeIcon(track, color, selected, cls, em),
             title: callsign(ac),
             keyboard: false,
+            zIndexOffset: em ? 800 : 0,
           });
           marker.on("click", () => select(ac.hex));
           marker.addTo(group);
-          markers.set(ac.hex, { marker, track, color, selected, cls });
+          markers.set(ac.hex, { marker, track, color, selected, cls, em });
           continue;
         }
 
         existing.marker.setLatLng(latlng);
 
-        // Only rebuild the icon when color/selection/class changes; rotate
-        // cheaply in place when only the heading moved.
-        if (existing.color !== color || existing.selected !== selected || existing.cls !== cls) {
-          existing.marker.setIcon(planeIcon(track, color, selected, cls));
+        // Only rebuild the icon when color/selection/class/emergency changes;
+        // rotate cheaply in place when only the heading moved.
+        if (
+          existing.color !== color ||
+          existing.selected !== selected ||
+          existing.cls !== cls ||
+          existing.em !== em
+        ) {
+          existing.marker.setIcon(planeIcon(track, color, selected, cls, em));
           existing.color = color;
           existing.selected = selected;
           existing.cls = cls;
+          existing.em = em;
           existing.track = track;
           if (selected) existing.marker.setZIndexOffset(1000);
           else existing.marker.setZIndexOffset(0);

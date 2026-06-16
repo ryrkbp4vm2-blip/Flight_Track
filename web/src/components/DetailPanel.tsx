@@ -1,5 +1,6 @@
 import { useAircraftStore } from "../store/useAircraftStore";
 import { classLabel, classifyAircraft } from "../lib/classify";
+import { emergencyInfo } from "../lib/emergency";
 import {
   callsign,
   formatAltitude,
@@ -49,6 +50,14 @@ export default function DetailPanel() {
         <button className="detail-close" onClick={() => select(null)} aria-label="Close">✕</button>
       </div>
       <div className="detail-class">{classLabel(classifyAircraft(ac))}</div>
+      {(() => {
+        const em = emergencyInfo(ac);
+        return em ? (
+          <div className={`detail-emergency ${em.severity}`}>
+            ⚠ {em.label} · squawk {ac.squawk ?? em.code}
+          </div>
+        ) : null;
+      })()}
       <div className="detail-grid">
         <Row label="Type" value={ac.t ?? "—"} />
         <Row label="Registration" value={ac.r ?? "—"} />

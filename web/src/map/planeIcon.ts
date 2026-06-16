@@ -1,5 +1,6 @@
 import L from "leaflet";
 import type { AircraftClass } from "../lib/classify";
+import type { EmergencySeverity } from "../lib/emergency";
 
 const SIZE = 26;
 
@@ -44,13 +45,19 @@ export function planeIcon(
   color: string,
   selected: boolean,
   cls: AircraftClass,
+  emergency: EmergencySeverity | null = null,
 ): L.DivIcon {
   const scale = selected ? 1.25 : 1;
+  // A pulsing halo behind the glyph signals an emergency squawk.
+  const halo = emergency
+    ? `<span class="plane-pulse ${emergency}"></span>`
+    : "";
   return L.divIcon({
-    className: "plane-marker",
+    className: `plane-marker${emergency ? " has-emergency" : ""}`,
     iconSize: [SIZE, SIZE],
     iconAnchor: [SIZE / 2, SIZE / 2],
     html:
+      halo +
       `<div class="plane-rot" style="transform:rotate(${Math.round(track)}deg) scale(${scale})">` +
       innerSvg(cls, color, selected) +
       `</div>`,
