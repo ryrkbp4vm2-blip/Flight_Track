@@ -1,0 +1,24 @@
+# Render Blueprint — one-click deploy. See https://render.com/docs/blueprint-spec
+# In Render: New → Blueprint → connect this repo. The free plan is fine to start.
+services:
+  - type: web
+    name: miltrack
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Serve real data by default (set to "1" only if the host blocks the feed).
+      - key: USE_SAMPLE_DATA
+        value: "0"
+      # Optional overrides — set these as secrets in the Render dashboard.
+      - key: UPSTREAM_URL
+        sync: false
+      - key: VESSELS_UPSTREAM_URL
+        sync: false
+      - key: AISSTREAM_API_KEY
+        sync: false
