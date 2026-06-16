@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { loadPref, savePref } from "../lib/persist";
+import type { AircraftClass } from "../lib/classify";
+import type { VesselClass } from "../lib/vessel";
 
 /** Which entity layers are shown on the map. */
 export type LayerMode = "air" | "sea" | "both";
@@ -10,9 +12,15 @@ interface MapState {
   activeLayers: LayerMode;
   /** Show trails for every contact (both layers), not just the selected one. */
   showAllTrails: boolean;
+  /** Allowed aircraft classes; empty = all allowed. */
+  airClassFilter: Set<AircraftClass>;
+  /** Allowed vessel classes; empty = all allowed. */
+  seaClassFilter: Set<VesselClass>;
   flyTo: (lat: number, lon: number) => void;
   setLayers: (mode: LayerMode) => void;
   toggleAllTrails: () => void;
+  toggleAirClass: (c: AircraftClass) => void;
+  toggleSeaClass: (c: VesselClass) => void;
 }
 
 /** Cross-cutting map UI state shared by the aircraft and vessel features. */
@@ -20,6 +28,8 @@ export const useMapStore = create<MapState>((set) => ({
   flyTarget: null,
   activeLayers: loadPref<LayerMode>("layers", "both"),
   showAllTrails: loadPref("showAllTrails", false),
+  airClassFilter: new Set(loadPref<AircraftClass[]>("airClassFilter", [])),
+  seaClassFilter: new Set(loadPref<VesselClass[]>("seaClassFilter", [])),
   flyTo: (lat, lon) =>
     set((state) => ({ flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 } })),
   setLayers: (mode) => {
@@ -32,7 +42,27 @@ export const useMapStore = create<MapState>((set) => ({
       savePref("showAllTrails", showAllTrails);
       return { showAllTrails };
     }),
+  toggleAirClass: (c) =>
+    set((state) => {
+      const next = new Set(state.airClassFilter);
+      next.has(c) ? next.delete(c) : next.add(c);
+      savePref("airClassFilter", [...next]);
+      return { airClassFilter: next };
+    }),
+  toggleSeaClass: (c) =>
+    set((state) => {
+      const next = new Set(state.seaClassFilter);
+      next.has(c) ? next.delete(c) : next.add(c);
+      savePref("seaClassFilter", [...next]);
+      return { seaClassFilter: next };
+    }),
 }));
 
 export const showAir = (m: LayerMode) => m === "air" || m === "both";
 export const showSea = (m: LayerMode) => m === "sea" || m === "both";
+
+/** Empty filter = everything allowed. */
+export const airClassAllowed = (filter: Set<AircraftClass>, c: AircraftClass) =>
+  filter.size === 0 || filter.has(c);
+export const seaClassAllowed = (filter: Set<VesselClass>, c: VesselClass) =>
+  filter.size === 0 || filter.has(c);

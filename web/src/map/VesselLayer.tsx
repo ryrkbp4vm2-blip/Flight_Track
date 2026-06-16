@@ -3,7 +3,7 @@ import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useVesselStore } from "../store/useVesselStore";
 import { useAircraftStore } from "../store/useAircraftStore";
-import { useMapStore, showSea } from "../store/useMapStore";
+import { useMapStore, showSea, seaClassAllowed } from "../store/useMapStore";
 import {
   classifyVessel,
   hasVesselPosition,
@@ -47,9 +47,11 @@ export default function VesselLayer() {
       }
 
       const filterText = useAircraftStore.getState().filterText;
+      const seaClassFilter = useMapStore.getState().seaClassFilter;
       const withPos = [...vessels.values()]
         .filter(hasVesselPosition)
-        .filter((v) => vesselMatches(v, filterText));
+        .filter((v) => vesselMatches(v, filterText))
+        .filter((v) => seaClassAllowed(seaClassFilter, classifyVessel(v)));
       const present = new Set(withPos.map((v) => v.mmsi));
 
       for (const [mmsi, rec] of markers) {

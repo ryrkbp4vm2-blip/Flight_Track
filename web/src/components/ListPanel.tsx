@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { useAircraftStore, type SortKey } from "../store/useAircraftStore";
 import { useVesselStore, type VesselSortKey } from "../store/useVesselStore";
+import { useMapStore, airClassAllowed, seaClassAllowed } from "../store/useMapStore";
 import { filterAircraft, sortAircraft } from "../store/selectors";
-import { vesselMatches, vesselName } from "../lib/vessel";
+import { classifyAircraft } from "../lib/classify";
+import { classifyVessel, vesselMatches, vesselName } from "../lib/vessel";
 import ListItem from "./ListItem";
 import VesselListItem from "./VesselListItem";
 import StatsView from "./StatsView";
@@ -38,13 +40,21 @@ export default function ListPanel({ onClose }: { onClose: () => void }) {
   const seaSortDir = useVesselStore((s) => s.sortDir);
   const setSeaSort = useVesselStore((s) => s.setSort);
 
+  // Class chip filters
+  const airClassFilter = useMapStore((s) => s.airClassFilter);
+  const seaClassFilter = useMapStore((s) => s.seaClassFilter);
+
   const airRows = useMemo(() => {
-    const list = filterAircraft([...aircraft.values()], filterText);
+    const list = filterAircraft([...aircraft.values()], filterText).filter((ac) =>
+      airClassAllowed(airClassFilter, classifyAircraft(ac)),
+    );
     return sortAircraft(list, airSortKey, airSortDir);
-  }, [aircraft, filterText, airSortKey, airSortDir]);
+  }, [aircraft, filterText, airSortKey, airSortDir, airClassFilter]);
 
   const seaRows = useMemo(() => {
-    const list = [...vessels.values()].filter((v) => vesselMatches(v, filterText));
+    const list = [...vessels.values()]
+      .filter((v) => vesselMatches(v, filterText))
+      .filter((v) => seaClassAllowed(seaClassFilter, classifyVessel(v)));
     const dir = seaSortDir === "asc" ? 1 : -1;
     list.sort((a, b) => {
       let cmp = 0;
@@ -65,7 +75,7 @@ export default function ListPanel({ onClose }: { onClose: () => void }) {
       return cmp * dir;
     });
     return list;
-  }, [vessels, filterText, seaSortKey, seaSortDir]);
+  }, [vessels, filterText, seaSortKey, seaSortDir, seaClassFilter]);
 
   return (
     <div className="list-panel">

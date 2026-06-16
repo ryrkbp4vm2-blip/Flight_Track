@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useAircraftStore } from "../store/useAircraftStore";
-import { useMapStore, showAir } from "../store/useMapStore";
+import { useMapStore, showAir, airClassAllowed } from "../store/useMapStore";
 import { filterAircraft } from "../store/selectors";
 import { altitudeFt, callsign, hasPosition } from "../lib/format";
 import { classifyAircraft, type AircraftClass } from "../lib/classify";
@@ -34,9 +34,10 @@ export default function AircraftLayer() {
 
     function render() {
       const { aircraft, selectedHex, filterText, select } = useAircraftStore.getState();
+      const { activeLayers, airClassFilter } = useMapStore.getState();
 
       // Hidden when the layer toggle is set to sea-only.
-      if (!showAir(useMapStore.getState().activeLayers)) {
+      if (!showAir(activeLayers)) {
         for (const [hex, rec] of markers) {
           group.removeLayer(rec.marker);
           markers.delete(hex);
@@ -44,9 +45,11 @@ export default function AircraftLayer() {
         return;
       }
 
-      // Determine which aircraft should be visible (respecting the filter).
+      // Determine which aircraft should be visible (text filter + class chips).
       const withPos = [...aircraft.values()].filter(hasPosition);
-      const visible = filterAircraft(withPos, filterText);
+      const visible = filterAircraft(withPos, filterText).filter((ac) =>
+        airClassAllowed(airClassFilter, classifyAircraft(ac)),
+      );
       const visibleHexes = new Set(visible.map((ac) => ac.hex));
 
       // Remove markers no longer visible.

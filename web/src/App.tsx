@@ -7,6 +7,7 @@ import VesselDetailPanel from "./components/VesselDetailPanel";
 import ListPanel from "./components/ListPanel";
 import LayerToggle from "./components/LayerToggle";
 import MapControls from "./components/MapControls";
+import FilterChips from "./components/FilterChips";
 import Legend from "./components/Legend";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
@@ -36,6 +37,8 @@ export default function App() {
           ☰
         </button>
       </header>
+
+      <FilterChips />
 
       {listOpen && <ListPanel onClose={() => setListOpen(false)} />}
 
