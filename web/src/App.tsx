@@ -6,6 +6,7 @@ import DetailPanel from "./components/DetailPanel";
 import VesselDetailPanel from "./components/VesselDetailPanel";
 import ListPanel from "./components/ListPanel";
 import LayerToggle from "./components/LayerToggle";
+import MapControls from "./components/MapControls";
 import Legend from "./components/Legend";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
@@ -37,6 +38,7 @@ export default function App() {
       {listOpen && <ListPanel onClose={() => setListOpen(false)} />}
 
       <LayerToggle />
+      <MapControls />
       <Legend />
       <DetailPanel />
       <VesselDetailPanel />

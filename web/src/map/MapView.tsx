@@ -13,6 +13,28 @@ import {
 import AircraftLayer from "./AircraftLayer";
 import VesselLayer from "./VesselLayer";
 import TrailsLayer from "./TrailsLayer";
+import { setMapInstance } from "./mapInstance";
+import { loadPref, savePref } from "../lib/persist";
+
+interface SavedView {
+  lat: number;
+  lon: number;
+  zoom: number;
+}
+
+/** Exposes the map instance to overlay controls and persists the view. */
+function ViewController() {
+  const map = useMap();
+  useEffect(() => {
+    setMapInstance(map);
+    return () => setMapInstance(null);
+  }, [map]);
+  useMapEvent("moveend", () => {
+    const c = map.getCenter();
+    savePref("view", { lat: c.lat, lon: c.lng, zoom: map.getZoom() } satisfies SavedView);
+  });
+  return null;
+}
 
 /**
  * Drives map movement from the store: explicit fly-to requests (selecting from
@@ -69,10 +91,14 @@ function DeselectOnMapClick() {
 }
 
 export default function MapView() {
+  const saved = loadPref<SavedView | null>("view", null);
+  const center: [number, number] = saved ? [saved.lat, saved.lon] : DEFAULT_CENTER;
+  const zoom = saved ? saved.zoom : DEFAULT_ZOOM;
+
   return (
     <MapContainer
-      center={DEFAULT_CENTER}
-      zoom={DEFAULT_ZOOM}
+      center={center}
+      zoom={zoom}
       maxZoom={MAX_ZOOM}
       minZoom={2}
       worldCopyJump
@@ -86,6 +112,7 @@ export default function MapView() {
       <VesselLayer />
       <AircraftLayer />
       <FlyController />
+      <ViewController />
       <DeselectOnMapClick />
     </MapContainer>
   );

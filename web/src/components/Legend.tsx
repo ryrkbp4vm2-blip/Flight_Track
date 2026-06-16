@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { loadPref, savePref } from "../lib/persist";
 
 const BANDS: { color: string; label: string }[] = [
   { color: "#b794ff", label: "40k+ ft" },
@@ -11,11 +12,18 @@ const BANDS: { color: string; label: string }[] = [
 
 /** Compact, collapsible key for the altitude color ramp. */
 export default function Legend() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => loadPref("legendOpen", false));
+
+  function toggle() {
+    setOpen((v) => {
+      savePref("legendOpen", !v);
+      return !v;
+    });
+  }
 
   return (
     <div className={`legend${open ? " open" : ""}`}>
-      <button className="legend-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+      <button className="legend-toggle" onClick={toggle} aria-expanded={open}>
         {open ? "Altitude ▾" : "Altitude ▴"}
       </button>
       {open && (

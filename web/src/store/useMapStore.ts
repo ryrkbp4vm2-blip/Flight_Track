@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { loadPref, savePref } from "../lib/persist";
 
 /** Which entity layers are shown on the map. */
 export type LayerMode = "air" | "sea" | "both";
@@ -14,10 +15,13 @@ interface MapState {
 /** Cross-cutting map UI state shared by the aircraft and vessel features. */
 export const useMapStore = create<MapState>((set) => ({
   flyTarget: null,
-  activeLayers: "both",
+  activeLayers: loadPref<LayerMode>("layers", "both"),
   flyTo: (lat, lon) =>
     set((state) => ({ flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 } })),
-  setLayers: (mode) => set({ activeLayers: mode }),
+  setLayers: (mode) => {
+    savePref("layers", mode);
+    set({ activeLayers: mode });
+  },
 }));
 
 export const showAir = (m: LayerMode) => m === "air" || m === "both";
