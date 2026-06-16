@@ -2,6 +2,7 @@ import { useAircraftStore } from "../store/useAircraftStore";
 import { useMapStore } from "../store/useMapStore";
 import { classLabel, classifyAircraft } from "../lib/classify";
 import { emergencyInfo } from "../lib/emergency";
+import { icaoCountry } from "../lib/icaoCountry";
 import {
   callsign,
   formatAltitude,
@@ -63,6 +64,10 @@ export default function DetailPanel() {
         <Row label="Type" value={ac.t ?? "—"} />
         <Row label="Registration" value={ac.r ?? "—"} />
         <Row label="Hex" value={ac.hex.toUpperCase()} />
+        {(() => {
+          const o = icaoCountry(ac.hex);
+          return <Row label="Origin" value={o ? `${o.flag} ${o.country}` : "—"} />;
+        })()}
         <Row label="Squawk" value={ac.squawk ?? "—"} />
         <Row label="Altitude" value={formatAltitude(ac)} />
         <Row label="Vertical" value={formatVerticalRate(ac)} />

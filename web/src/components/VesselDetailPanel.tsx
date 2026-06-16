@@ -7,6 +7,7 @@ import {
   vesselLabel,
   vesselName,
 } from "../lib/vessel";
+import { countryFlag } from "../lib/icaoCountry";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -55,7 +56,7 @@ export default function VesselDetailPanel() {
       )}
       <div className="detail-grid">
         <Row label="Type" value={v.type ?? "—"} />
-        <Row label="Navy" value={v.country ?? "—"} />
+        <Row label="Navy" value={v.country ? `${countryFlag(v.country)} ${v.country}` : "—"} />
         <Row label="Hull" value={v.hull ?? "—"} />
         <Row label="MMSI" value={v.mmsi} />
         <Row label="Speed" value={typeof v.sog === "number" ? `${v.sog.toFixed(0)} kn` : "—"} />
