@@ -14,6 +14,7 @@
     "build": "npm -w web run build",
     "start": "npm -w server run start",
     "typecheck": "npm -w web run typecheck && npm -w server run typecheck",
+    "test": "node --import tsx --test tests/*.test.ts",
     "demo": "tsx scripts/render-demo.mts"
   },
   "devDependencies": {

@@ -70,6 +70,13 @@ USE_SAMPLE_DATA=1 npm run dev
 
 A `SAMPLE DATA` badge appears in the status bar when this is active.
 
+## Tests & checks
+
+```bash
+npm test        # unit tests for classification, emergencies, vessels, filtering, trails
+npm run typecheck
+```
+
 ## Production build
 
 ```bash
