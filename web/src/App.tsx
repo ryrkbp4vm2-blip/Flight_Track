@@ -8,15 +8,18 @@ import ListPanel from "./components/ListPanel";
 import LayerToggle from "./components/LayerToggle";
 import MapControls from "./components/MapControls";
 import FilterChips from "./components/FilterChips";
+import AlertToasts from "./components/AlertToasts";
 import Legend from "./components/Legend";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
 import { useKeyboard } from "./hooks/useKeyboard";
+import { useAlerts } from "./hooks/useAlerts";
 
 export default function App() {
   usePolling();
   useUrlSync();
   useKeyboard();
+  useAlerts();
   const [listOpen, setListOpen] = useState(false);
 
   return (
@@ -39,6 +42,7 @@ export default function App() {
       </header>
 
       <FilterChips />
+      <AlertToasts />
 
       {listOpen && <ListPanel onClose={() => setListOpen(false)} />}
 
