@@ -1,0 +1,38 @@
+import { useState } from "react";
+import MapView from "./map/MapView";
+import SearchBar from "./components/SearchBar";
+import StatusBar from "./components/StatusBar";
+import DetailPanel from "./components/DetailPanel";
+import AircraftList from "./components/AircraftList";
+import { usePolling } from "./hooks/usePolling";
+
+export default function App() {
+  usePolling();
+  const [listOpen, setListOpen] = useState(false);
+
+  return (
+    <div className="app">
+      <MapView />
+
+      <header className="top-bar">
+        <div className="brand">
+          <span className="brand-glyph" aria-hidden>✈</span>
+          <span className="brand-text">MilTrack</span>
+        </div>
+        <SearchBar />
+        <button
+          className={`list-toggle${listOpen ? " active" : ""}`}
+          onClick={() => setListOpen((v) => !v)}
+          aria-label="Toggle aircraft list"
+        >
+          ☰
+        </button>
+      </header>
+
+      {listOpen && <AircraftList onClose={() => setListOpen(false)} />}
+
+      <DetailPanel />
+      <StatusBar />
+    </div>
+  );
+}
