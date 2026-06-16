@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useAircraftStore, type SortKey } from "../store/useAircraftStore";
 import { useVesselStore, type VesselSortKey } from "../store/useVesselStore";
 import { filterAircraft, sortAircraft } from "../store/selectors";
-import { vesselName } from "../lib/vessel";
+import { vesselMatches, vesselName } from "../lib/vessel";
 import ListItem from "./ListItem";
 import VesselListItem from "./VesselListItem";
 
@@ -43,15 +43,7 @@ export default function ListPanel({ onClose }: { onClose: () => void }) {
   }, [aircraft, filterText, airSortKey, airSortDir]);
 
   const seaRows = useMemo(() => {
-    const q = filterText.trim().toLowerCase();
-    let list = [...vessels.values()];
-    if (q) {
-      list = list.filter((v) =>
-        [vesselName(v), v.type, v.country, v.hull, v.mmsi, v.callsign]
-          .filter(Boolean)
-          .some((s) => (s as string).toLowerCase().includes(q)),
-      );
-    }
+    const list = [...vessels.values()].filter((v) => vesselMatches(v, filterText));
     const dir = seaSortDir === "asc" ? 1 : -1;
     list.sort((a, b) => {
       let cmp = 0;

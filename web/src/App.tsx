@@ -10,10 +10,12 @@ import MapControls from "./components/MapControls";
 import Legend from "./components/Legend";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
+import { useKeyboard } from "./hooks/useKeyboard";
 
 export default function App() {
   usePolling();
   useUrlSync();
+  useKeyboard();
   const [listOpen, setListOpen] = useState(false);
 
   return (

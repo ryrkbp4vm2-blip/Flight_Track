@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useVesselStore } from "../store/useVesselStore";
+import { useAircraftStore } from "../store/useAircraftStore";
 import { useMapStore, showSea } from "../store/useMapStore";
 import {
   classifyVessel,
   hasVesselPosition,
   vesselColor,
   vesselHeading,
+  vesselMatches,
   vesselName,
   vesselSizeScale,
 } from "../lib/vessel";
@@ -44,7 +46,10 @@ export default function VesselLayer() {
         return;
       }
 
-      const withPos = [...vessels.values()].filter(hasVesselPosition);
+      const filterText = useAircraftStore.getState().filterText;
+      const withPos = [...vessels.values()]
+        .filter(hasVesselPosition)
+        .filter((v) => vesselMatches(v, filterText));
       const present = new Set(withPos.map((v) => v.mmsi));
 
       for (const [mmsi, rec] of markers) {
@@ -120,10 +125,12 @@ export default function VesselLayer() {
     render();
     const unsubV = useVesselStore.subscribe(render);
     const unsubM = useMapStore.subscribe(render);
+    const unsubA = useAircraftStore.subscribe(render);
 
     return () => {
       unsubV();
       unsubM();
+      unsubA();
       trailGroup.remove();
       markerGroup.remove();
       markers.clear();

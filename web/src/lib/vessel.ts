@@ -82,3 +82,14 @@ export function hasVesselPosition<T extends Vessel>(
 ): v is T & { lat: number; lon: number } {
   return typeof v.lat === "number" && typeof v.lon === "number";
 }
+
+/** True when the vessel matches a free-text query (name/type/country/hull/mmsi/callsign). */
+export function vesselMatches(v: Vessel, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  // "emergency" is an aircraft-only concept; vessels never match it.
+  if (q === "emergency") return false;
+  return [vesselName(v), v.type, v.country, v.hull, v.mmsi, v.callsign]
+    .filter(Boolean)
+    .some((s) => (s as string).toLowerCase().includes(q));
+}
