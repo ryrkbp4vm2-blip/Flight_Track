@@ -13,6 +13,8 @@ import {
 import AircraftLayer from "./AircraftLayer";
 import VesselLayer from "./VesselLayer";
 import TrailsLayer from "./TrailsLayer";
+import RangeRingsLayer from "./RangeRingsLayer";
+import MeasureLayer from "./MeasureLayer";
 import { setMapInstance } from "./mapInstance";
 import { loadPref, savePref } from "../lib/persist";
 
@@ -79,11 +81,12 @@ function FlyController() {
   return null;
 }
 
-/** Clears both selections when the empty map is clicked. */
+/** Clears both selections when the empty map is clicked (unless measuring). */
 function DeselectOnMapClick() {
   const selectAir = useAircraftStore((s) => s.select);
   const clearVessel = useVesselStore((s) => s.clearSelection);
   useMapEvent("click", () => {
+    if (useMapStore.getState().measureMode) return;
     selectAir(null);
     clearVessel();
   });
@@ -109,8 +112,10 @@ export default function MapView() {
     >
       <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} maxZoom={MAX_ZOOM} />
       <TrailsLayer />
+      <RangeRingsLayer />
       <VesselLayer />
       <AircraftLayer />
+      <MeasureLayer />
       <FlyController />
       <ViewController />
       <DeselectOnMapClick />

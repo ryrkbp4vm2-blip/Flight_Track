@@ -16,11 +16,17 @@ interface MapState {
   airClassFilter: Set<AircraftClass>;
   /** Allowed vessel classes; empty = all allowed. */
   seaClassFilter: Set<VesselClass>;
+  /** Draw range rings around the selected contact. */
+  rangeRings: boolean;
+  /** Two-click distance/bearing measure mode. */
+  measureMode: boolean;
   flyTo: (lat: number, lon: number) => void;
   setLayers: (mode: LayerMode) => void;
   toggleAllTrails: () => void;
   toggleAirClass: (c: AircraftClass) => void;
   toggleSeaClass: (c: VesselClass) => void;
+  toggleRangeRings: () => void;
+  toggleMeasure: () => void;
 }
 
 /** Cross-cutting map UI state shared by the aircraft and vessel features. */
@@ -30,6 +36,8 @@ export const useMapStore = create<MapState>((set) => ({
   showAllTrails: loadPref("showAllTrails", false),
   airClassFilter: new Set(loadPref<AircraftClass[]>("airClassFilter", [])),
   seaClassFilter: new Set(loadPref<VesselClass[]>("seaClassFilter", [])),
+  rangeRings: loadPref("rangeRings", false),
+  measureMode: false,
   flyTo: (lat, lon) =>
     set((state) => ({ flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 } })),
   setLayers: (mode) => {
@@ -56,6 +64,14 @@ export const useMapStore = create<MapState>((set) => ({
       savePref("seaClassFilter", [...next]);
       return { seaClassFilter: next };
     }),
+  toggleRangeRings: () =>
+    set((state) => {
+      const rangeRings = !state.rangeRings;
+      savePref("rangeRings", rangeRings);
+      return { rangeRings };
+    }),
+  // Measure mode is transient (not persisted).
+  toggleMeasure: () => set((state) => ({ measureMode: !state.measureMode })),
 }));
 
 export const showAir = (m: LayerMode) => m === "air" || m === "both";

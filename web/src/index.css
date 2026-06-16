@@ -570,6 +570,32 @@ body {
   color: var(--accent);
   animation: em-blink 1s ease-in-out infinite;
 }
+.map-controls button.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(90, 209, 255, 0.14);
+}
+
+/* Range-ring and measure labels (Leaflet divIcons). */
+.ring-label {
+  color: #5ad1ff;
+  font-size: 10px;
+  font-weight: 600;
+  text-shadow: 0 0 3px #000;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.measure-label {
+  color: #ffd23f;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(11, 15, 20, 0.8);
+  border: 1px solid rgba(255, 210, 63, 0.5);
+  border-radius: 6px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
 
 /* ---- Legend ---- */
 .legend {

@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { getMapInstance } from "../map/mapInstance";
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from "../map/mapConfig";
+import { useMapStore } from "../store/useMapStore";
 
-/** Zoom, reset-view, and locate-me controls (overlay outside the map). */
+/** Zoom, reset, locate, range-rings, and measure controls. */
 export default function MapControls() {
   const [locating, setLocating] = useState(false);
+  const rangeRings = useMapStore((s) => s.rangeRings);
+  const toggleRangeRings = useMapStore((s) => s.toggleRangeRings);
+  const measureMode = useMapStore((s) => s.measureMode);
+  const toggleMeasure = useMapStore((s) => s.toggleMeasure);
 
   function zoomIn() {
     getMapInstance()?.zoomIn();
@@ -41,6 +46,22 @@ export default function MapControls() {
         className={locating ? "busy" : ""}
       >
         ◎
+      </button>
+      <button
+        onClick={toggleRangeRings}
+        aria-pressed={rangeRings}
+        title="Range rings around the selected contact"
+        className={rangeRings ? "on" : ""}
+      >
+        ◉
+      </button>
+      <button
+        onClick={toggleMeasure}
+        aria-pressed={measureMode}
+        title="Measure distance & bearing"
+        className={measureMode ? "on" : ""}
+      >
+        ⤢
       </button>
     </div>
   );
