@@ -5,8 +5,9 @@ import { filterAircraft, sortAircraft } from "../store/selectors";
 import { vesselMatches, vesselName } from "../lib/vessel";
 import ListItem from "./ListItem";
 import VesselListItem from "./VesselListItem";
+import StatsView from "./StatsView";
 
-type Tab = "air" | "sea";
+type Tab = "air" | "sea" | "stats";
 
 const AIR_COLS: { key: SortKey; label: string }[] = [
   { key: "callsign", label: "Callsign" },
@@ -76,10 +77,14 @@ export default function ListPanel({ onClose }: { onClose: () => void }) {
           <button className={tab === "sea" ? "active" : ""} onClick={() => setTab("sea")}>
             ⚓ Vessels <span className="tab-count">{seaRows.length}</span>
           </button>
+          <button className={tab === "stats" ? "active" : ""} onClick={() => setTab("stats")}>
+            ▦ Stats
+          </button>
         </div>
         <button className="list-close" onClick={onClose} aria-label="Close list">✕</button>
       </div>
 
+      {tab !== "stats" && (
       <div className="list-cols">
         <span className="li-dot" />
         {tab === "air"
@@ -104,9 +109,12 @@ export default function ListPanel({ onClose }: { onClose: () => void }) {
               </button>
             ))}
       </div>
+      )}
 
       <div className="list-scroll">
-        {tab === "air" ? (
+        {tab === "stats" ? (
+          <StatsView />
+        ) : tab === "air" ? (
           airRows.length === 0 ? (
             <p className="list-empty">No aircraft match.</p>
           ) : (
