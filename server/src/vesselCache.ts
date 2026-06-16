@@ -1,5 +1,6 @@
 import { config } from "./config.js";
 import { BASE_VESSELS } from "./vesselSample.js";
+import { startAisStream, getAisVessels, getAisError } from "./aisStream.js";
 import type { Vessel, VesselResponse } from "../../shared/types.js";
 
 /**
@@ -49,6 +50,16 @@ function simulate(): VesselResponse {
 }
 
 async function pollOnce(): Promise<void> {
+  // Live aisstream.io feed takes precedence when a key is configured.
+  if (config.aisApiKey) {
+    const vessels = getAisVessels();
+    state.data = { vessels, now: Date.now(), total: vessels.length };
+    state.fetchedAt = Date.now();
+    state.sample = false;
+    state.lastError = getAisError();
+    return;
+  }
+
   // No upstream configured → serve the simulated curated fleet.
   if (!config.vesselsUpstreamUrl) {
     state.data = simulate();
@@ -89,6 +100,7 @@ async function pollOnce(): Promise<void> {
 
 export function startVesselPolling(): void {
   if (timer) return;
+  startAisStream();
   void pollOnce();
   timer = setInterval(() => void pollOnce(), config.pollIntervalMs);
   timer.unref?.();

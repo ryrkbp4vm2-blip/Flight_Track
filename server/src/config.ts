@@ -23,6 +23,14 @@ export const config = {
   vesselsUpstreamUrl: process.env.VESSELS_UPSTREAM_URL ?? "",
 
   /**
+   * Optional aisstream.io API key. When set, the server opens a WebSocket to
+   * aisstream.io and serves live vessels filtered to likely-military contacts
+   * (AIS ship type 35 + navy name prefixes). Takes precedence over the curated
+   * fleet. Free key: https://aisstream.io
+   */
+  aisApiKey: process.env.AISSTREAM_API_KEY ?? "",
+
+  /**
    * How often the server polls upstream, in ms. The free airplanes.live API is
    * rate-limited to 1 req/sec; we stay comfortably under it. A single shared
    * poller means client count never affects upstream load.

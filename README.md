@@ -93,6 +93,7 @@ Open http://localhost:3001. On a phone (same network) use "Add to Home Screen".
 | `PORT`                 | `3001`                                   | Server port                              |
 | `UPSTREAM_URL`         | `https://api.airplanes.live/v2/mil/`     | Aircraft feed (ADS-B Exchange v2)        |
 | `VESSELS_UPSTREAM_URL` | _(unset)_                                | Live AIS vessel feed (see note below)    |
+| `AISSTREAM_API_KEY`    | _(unset)_                                | Live military AIS via aisstream.io       |
 | `POLL_INTERVAL_MS`     | `2000`                                   | Upstream poll interval                   |
 | `USE_SAMPLE_DATA`      | _(off)_ set `1`                          | Serve bundled aircraft sample on failure |
 
@@ -104,10 +105,17 @@ The aircraft upstream is swappable for any ADS-B Exchange v2-compatible feed
 Unlike military aircraft (airplanes.live offers a clean `/v2/mil` feed), there
 is **no free "military vessels only" feed** — warships routinely disable AIS, so
 live coverage is sparse. By default the server therefore serves a **curated set
-of notable navy vessels** (carriers, destroyers, subs, etc.) with simulated
-movement, so the sea layer is always demonstrable. Point `VESSELS_UPSTREAM_URL`
-at any source returning `{ "vessels": [ ... ] }` (AIS gateway, your own
-aggregator) to show real positions.
+of notable navy vessels** (29 ships across 15 navies) with simulated movement,
+so the sea layer is always demonstrable. For real positions either:
+
+- Set **`AISSTREAM_API_KEY`** (free key from [aisstream.io](https://aisstream.io)) —
+  the server opens a WebSocket and filters the global AIS firehose to
+  likely-military contacts (AIS ship type 35 + navy name prefixes), or
+- Point **`VESSELS_UPSTREAM_URL`** at any source returning `{ "vessels": [ ... ] }`.
+
+Live AIS coverage of warships is inherently sparse and the type-35/name
+heuristic is approximate; this adapter is experimental and isn't exercised in
+the sandbox.
 
 ## Project layout
 
