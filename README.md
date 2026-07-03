@@ -37,6 +37,10 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
 - 📋 Sortable, tabbed list view (Aircraft | Vessels)
 - 🛰️ Flight/voyage trails for the selected contact (or all aircraft trails)
 - 🗺️ Altitude color legend
+- 📐 **Unit systems** — switch between **Aviation** (ft · kt · nm), **Metric**
+  (m · km/h · km) and **Imperial** (ft · mph · mi) from the Alerts tab; the choice
+  is remembered and applies to detail panels, list rows, the measure tool and
+  range rings
 - 📲 Installable PWA with offline app shell
 
 ## How it works

@@ -28,6 +28,7 @@ export default function DetailPanel() {
   const ac = useAircraftStore((s) => (selectedHex ? s.aircraft.get(selectedHex) : undefined));
   const select = useAircraftStore((s) => s.select);
   const flyTo = useMapStore((s) => s.flyTo);
+  const units = useMapStore((s) => s.units);
   const followSelected = useAircraftStore((s) => s.followSelected);
   const toggleFollow = useAircraftStore((s) => s.toggleFollow);
   const watchedAir = useAlertsStore((s) => s.watchedAir);
@@ -82,9 +83,9 @@ export default function DetailPanel() {
           return <Row label="Origin" value={o ? `${o.flag} ${o.country}` : "—"} />;
         })()}
         <Row label="Squawk" value={ac.squawk ?? "—"} />
-        <Row label="Altitude" value={formatAltitude(ac)} />
-        <Row label="Vertical" value={formatVerticalRate(ac)} />
-        <Row label="Speed" value={formatSpeed(ac)} />
+        <Row label="Altitude" value={formatAltitude(ac, units)} />
+        <Row label="Vertical" value={formatVerticalRate(ac, units)} />
+        <Row label="Speed" value={formatSpeed(ac, units)} />
         <Row label="Heading" value={formatHeading(ac)} />
         <Row label="Position" value={formatPosition(ac)} />
         {ac.emergency && ac.emergency !== "none" && (

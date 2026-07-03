@@ -31,10 +31,3 @@ export function bearingDeg(a: LatLon, b: LatLon): number {
 }
 
 export const NM_TO_KM = 1.852;
-
-/** Format a nautical-mile distance as "<nm> nm · <km> km". */
-export function formatDistance(nm: number): string {
-  const km = nm * NM_TO_KM;
-  const f = (v: number) => (v >= 100 ? Math.round(v) : v.toFixed(1));
-  return `${f(nm)} nm · ${f(km)} km`;
-}

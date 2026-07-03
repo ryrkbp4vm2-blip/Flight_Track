@@ -16,6 +16,7 @@ export default function ListItem({ ac }: { ac: TrackedAircraft }) {
   const selectedHex = useAircraftStore((s) => s.selectedHex);
   const select = useAircraftStore((s) => s.select);
   const flyTo = useMapStore((s) => s.flyTo);
+  const units = useMapStore((s) => s.units);
   const watched = useAlertsStore((s) => s.watchedAir.has(ac.hex));
   const selected = ac.hex === selectedHex;
   const em = emergencyInfo(ac);
@@ -42,8 +43,8 @@ export default function ListItem({ ac }: { ac: TrackedAircraft }) {
         {em && <span className="li-emflag">{em.code}</span>}
       </span>
       <span className="li-type">{ac.t ?? "—"}</span>
-      <span className="li-alt">{formatAltitude(ac)}</span>
-      <span className="li-spd">{formatSpeed(ac)}</span>
+      <span className="li-alt">{formatAltitude(ac, units)}</span>
+      <span className="li-spd">{formatSpeed(ac, units)}</span>
     </button>
   );
 }

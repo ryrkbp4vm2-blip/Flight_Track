@@ -958,6 +958,38 @@ body {
   border-bottom: 1px solid var(--border);
   margin-bottom: 12px;
 }
+.units-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.units-label {
+  font-size: 13px;
+  color: var(--text);
+}
+.units-seg {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.units-seg-btn {
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.units-seg-btn:first-child {
+  border-left: none;
+}
+.units-seg-btn.on {
+  background: rgba(90, 209, 255, 0.15);
+  color: var(--accent);
+}
 .alert-toggle {
   display: flex;
   align-items: center;

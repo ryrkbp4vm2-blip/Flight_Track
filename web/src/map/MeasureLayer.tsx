@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import { useMapStore } from "../store/useMapStore";
-import { bearingDeg, formatDistance, haversineNm, type LatLon } from "../lib/geo";
+import { bearingDeg, haversineNm, type LatLon } from "../lib/geo";
+import { formatDistance } from "../lib/units";
 
 /**
  * Two-click distance/bearing measure tool. Active only when `measureMode` is on
@@ -10,6 +11,7 @@ import { bearingDeg, formatDistance, haversineNm, type LatLon } from "../lib/geo
  */
 export default function MeasureLayer() {
   const measureMode = useMapStore((s) => s.measureMode);
+  const units = useMapStore((s) => s.units);
   const [points, setPoints] = useState<LatLon[]>([]);
   const groupRef = useRef<L.LayerGroup | null>(null);
 
@@ -58,13 +60,13 @@ export default function MeasureLayer() {
         interactive: false,
         icon: L.divIcon({
           className: "measure-label",
-          html: `${formatDistance(nm)} · ${Math.round(brg)}°`,
+          html: `${formatDistance(nm, units)} · ${Math.round(brg)}°`,
           iconSize: [180, 20],
           iconAnchor: [-8, 10],
         }),
       }).addTo(group);
     }
-  }, [points, measureMode, map]);
+  }, [points, measureMode, map, units]);
 
   useEffect(() => {
     return () => {

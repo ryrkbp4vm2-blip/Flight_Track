@@ -1,4 +1,10 @@
 import type { Aircraft } from "../../../shared/types";
+import {
+  formatAltitude as fmtAltitude,
+  formatSpeed as fmtSpeed,
+  formatVerticalRate as fmtVertical,
+  type UnitSystem,
+} from "./units";
 
 /** Trimmed callsign, falling back to registration then hex. */
 export function callsign(ac: Aircraft): string {
@@ -16,24 +22,23 @@ export function altitudeFt(ac: Aircraft): number | null {
   return null;
 }
 
-export function formatAltitude(ac: Aircraft): string {
+export function formatAltitude(ac: Aircraft, sys: UnitSystem = "aviation"): string {
   if (ac.alt_baro === "ground") return "Ground";
   const a = altitudeFt(ac);
-  return a === null ? "—" : `${a.toLocaleString()} ft`;
+  return a === null ? "—" : fmtAltitude(a, sys);
 }
 
-export function formatSpeed(ac: Aircraft): string {
-  return typeof ac.gs === "number" ? `${Math.round(ac.gs)} kt` : "—";
+export function formatSpeed(ac: Aircraft, sys: UnitSystem = "aviation"): string {
+  return typeof ac.gs === "number" ? fmtSpeed(ac.gs, sys) : "—";
 }
 
 export function formatHeading(ac: Aircraft): string {
   return typeof ac.track === "number" ? `${Math.round(ac.track)}°` : "—";
 }
 
-export function formatVerticalRate(ac: Aircraft): string {
+export function formatVerticalRate(ac: Aircraft, sys: UnitSystem = "aviation"): string {
   if (typeof ac.baro_rate !== "number" || ac.baro_rate === 0) return "Level";
-  const arrow = ac.baro_rate > 0 ? "▲" : "▼";
-  return `${arrow} ${Math.abs(ac.baro_rate).toLocaleString()} ft/min`;
+  return fmtVertical(ac.baro_rate, sys);
 }
 
 export function formatPosition(ac: Aircraft): string {

@@ -9,6 +9,7 @@ import {
   vesselName,
 } from "../lib/vessel";
 import { countryFlag } from "../lib/icaoCountry";
+import { formatSpeed, formatLength } from "../lib/units";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -24,6 +25,7 @@ export default function VesselDetailPanel() {
   const v = useVesselStore((s) => (selectedMmsi ? s.vessels.get(selectedMmsi) : undefined));
   const clearSelection = useVesselStore((s) => s.clearSelection);
   const flyTo = useMapStore((s) => s.flyTo);
+  const units = useMapStore((s) => s.units);
   const watchedSea = useAlertsStore((s) => s.watchedSea);
   const toggleWatchSea = useAlertsStore((s) => s.toggleWatchSea);
 
@@ -72,9 +74,9 @@ export default function VesselDetailPanel() {
         <Row label="Navy" value={v.country ? `${countryFlag(v.country)} ${v.country}` : "—"} />
         <Row label="Hull" value={v.hull ?? "—"} />
         <Row label="MMSI" value={v.mmsi} />
-        <Row label="Speed" value={typeof v.sog === "number" ? `${v.sog.toFixed(0)} kn` : "—"} />
+        <Row label="Speed" value={typeof v.sog === "number" ? formatSpeed(v.sog, units) : "—"} />
         <Row label="Course" value={`${Math.round(heading)}°`} />
-        <Row label="Length" value={typeof v.length === "number" ? `${v.length} m` : "—"} />
+        <Row label="Length" value={typeof v.length === "number" ? formatLength(v.length, units) : "—"} />
         <Row label="Callsign" value={v.callsign ?? "—"} />
         <Row label="Status" value={v.navStatus ?? "Under way"} />
         <Row label="Position" value={pos} />

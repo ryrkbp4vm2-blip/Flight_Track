@@ -5,8 +5,7 @@ import { useMapStore } from "../store/useMapStore";
 import { useAircraftStore } from "../store/useAircraftStore";
 import { useVesselStore } from "../store/useVesselStore";
 import { NM_TO_KM } from "../lib/geo";
-
-const RANGE_NM = [50, 100, 200, 400];
+import { rangeRingSet } from "../lib/units";
 
 /** Concentric distance rings centered on the selected contact. */
 export default function RangeRingsLayer() {
@@ -39,9 +38,9 @@ export default function RangeRingsLayer() {
       const pos = selectedPosition();
       if (!pos) return;
 
-      for (const nm of RANGE_NM) {
+      for (const ring of rangeRingSet(useMapStore.getState().units)) {
         L.circle([pos.lat, pos.lon], {
-          radius: nm * NM_TO_KM * 1000, // metres
+          radius: ring.nm * NM_TO_KM * 1000, // metres
           renderer: L.svg(),
           color: "#5ad1ff",
           weight: 1,
@@ -51,10 +50,10 @@ export default function RangeRingsLayer() {
           interactive: false,
         }).addTo(group);
         // Label due north of centre at the ring radius.
-        const northLat = pos.lat + nm / 60;
+        const northLat = pos.lat + ring.nm / 60;
         L.marker([northLat, pos.lon], {
           interactive: false,
-          icon: L.divIcon({ className: "ring-label", html: `${nm} nm`, iconSize: [44, 14] }),
+          icon: L.divIcon({ className: "ring-label", html: ring.label, iconSize: [44, 14] }),
         }).addTo(group);
       }
     }

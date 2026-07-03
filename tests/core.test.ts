@@ -4,7 +4,14 @@ import assert from "node:assert/strict";
 import { classifyAircraft } from "../web/src/lib/classify.ts";
 import { emergencyInfo, isEmergency } from "../web/src/lib/emergency.ts";
 import { classifyVessel, vesselName, vesselHeading, hasVesselPosition } from "../web/src/lib/vessel.ts";
-import { haversineNm, bearingDeg, formatDistance } from "../web/src/lib/geo.ts";
+import { haversineNm, bearingDeg } from "../web/src/lib/geo.ts";
+import {
+  formatAltitude as fmtAltitude,
+  formatSpeed as fmtSpeed,
+  formatDistance,
+  formatLength,
+  rangeRingSet,
+} from "../web/src/lib/units.ts";
 import { icaoCountry, countryFlag } from "../web/src/lib/icaoCountry.ts";
 import { airClassAllowed, seaClassAllowed } from "../web/src/store/useMapStore.ts";
 import { newlyTrue, intersect } from "../web/src/lib/alerts.ts";
@@ -121,8 +128,37 @@ test("geo: distance, bearing, formatting", () => {
   assert.equal(haversineNm({ lat: 10, lon: 20 }, { lat: 10, lon: 20 }), 0);
   assert.ok(Math.abs(bearingDeg({ lat: 0, lon: 0 }, { lat: 1, lon: 0 }) - 0) < 0.001);
   assert.ok(Math.abs(bearingDeg({ lat: 0, lon: 0 }, { lat: 0, lon: 1 }) - 90) < 0.001);
-  assert.match(formatDistance(60), /nm/);
-  assert.match(formatDistance(60), /km/);
+});
+
+test("units: convert altitude, speed, distance, length by system", () => {
+  // Altitude: feet, or metres when metric.
+  assert.equal(fmtAltitude(33000, "aviation"), "33,000 ft");
+  assert.equal(fmtAltitude(33000, "imperial"), "33,000 ft");
+  assert.equal(fmtAltitude(1000, "metric"), "305 m");
+  // Speed: knots → km/h (metric) → mph (imperial).
+  assert.equal(fmtSpeed(100, "aviation"), "100 kt");
+  assert.equal(fmtSpeed(100, "metric"), "185 km/h");
+  assert.equal(fmtSpeed(100, "imperial"), "115 mph");
+  // Distance carries the right unit and value.
+  assert.match(formatDistance(60, "aviation"), /^60(\.0)? nm$/);
+  assert.match(formatDistance(60, "metric"), /km$/);
+  assert.match(formatDistance(60, "imperial"), /mi$/);
+  assert.equal(formatDistance(100, "metric"), "185 km");
+  // Ship length: metres, or feet when imperial.
+  assert.equal(formatLength(150, "metric"), "150 m");
+  assert.equal(formatLength(150, "aviation"), "150 m");
+  assert.equal(formatLength(30, "imperial"), "98 ft");
+  // Range-ring sets use round numbers in the displayed unit.
+  assert.deepEqual(
+    rangeRingSet("aviation").map((r) => r.label),
+    ["50 nm", "100 nm", "200 nm", "400 nm"],
+  );
+  assert.deepEqual(
+    rangeRingSet("metric").map((r) => r.label),
+    ["50 km", "100 km", "200 km", "500 km"],
+  );
+  // A 100 km ring's physical radius is 100/1.852 nm.
+  assert.ok(Math.abs(rangeRingSet("metric")[1].nm - 100 / 1.852) < 1e-6);
 });
 
 test("icaoCountry maps hex blocks to countries/flags", () => {

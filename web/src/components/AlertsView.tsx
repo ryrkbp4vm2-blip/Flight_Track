@@ -4,6 +4,7 @@ import { useAircraftStore } from "../store/useAircraftStore";
 import { useVesselStore } from "../store/useVesselStore";
 import { useMapStore } from "../store/useMapStore";
 import { formatAge } from "../lib/format";
+import { UNIT_SYSTEMS } from "../lib/units";
 
 const TOGGLES: { key: keyof AlertSettings; label: string }[] = [
   { key: "emergency", label: "Emergency squawks" },
@@ -16,6 +17,8 @@ export default function AlertsView() {
   const settings = useAlertsStore((s) => s.settings);
   const setSetting = useAlertsStore((s) => s.setSetting);
   const clearLog = useAlertsStore((s) => s.clearLog);
+  const units = useMapStore((s) => s.units);
+  const setUnits = useMapStore((s) => s.setUnits);
   const [, tick] = useState(0);
 
   function focus(domain: "air" | "sea", ref: string) {
@@ -49,6 +52,22 @@ export default function AlertsView() {
   return (
     <div className="alerts-view">
       <div className="alerts-settings">
+        <div className="units-select">
+          <span className="units-label">Units</span>
+          <div className="units-seg" role="group" aria-label="Unit system">
+            {UNIT_SYSTEMS.map((u) => (
+              <button
+                key={u.key}
+                className={`units-seg-btn${units === u.key ? " on" : ""}`}
+                aria-pressed={units === u.key}
+                title={u.hint}
+                onClick={() => setUnits(u.key)}
+              >
+                {u.label}
+              </button>
+            ))}
+          </div>
+        </div>
         {TOGGLES.map((t) => (
           <label key={t.key} className="alert-toggle">
             <input

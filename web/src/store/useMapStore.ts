@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { loadPref, savePref } from "../lib/persist";
 import type { AircraftClass } from "../lib/classify";
 import type { VesselClass } from "../lib/vessel";
+import type { UnitSystem } from "../lib/units";
 
 /** Which entity layers are shown on the map. */
 export type LayerMode = "air" | "sea" | "both";
@@ -20,6 +21,8 @@ interface MapState {
   rangeRings: boolean;
   /** Two-click distance/bearing measure mode. */
   measureMode: boolean;
+  /** Unit system for altitude / speed / distance display. */
+  units: UnitSystem;
   flyTo: (lat: number, lon: number) => void;
   setLayers: (mode: LayerMode) => void;
   toggleAllTrails: () => void;
@@ -27,6 +30,7 @@ interface MapState {
   toggleSeaClass: (c: VesselClass) => void;
   toggleRangeRings: () => void;
   toggleMeasure: () => void;
+  setUnits: (u: UnitSystem) => void;
 }
 
 /** Cross-cutting map UI state shared by the aircraft and vessel features. */
@@ -38,6 +42,7 @@ export const useMapStore = create<MapState>((set) => ({
   seaClassFilter: new Set(loadPref<VesselClass[]>("seaClassFilter", [])),
   rangeRings: loadPref("rangeRings", false),
   measureMode: false,
+  units: loadPref<UnitSystem>("units", "aviation"),
   flyTo: (lat, lon) =>
     set((state) => ({ flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 } })),
   setLayers: (mode) => {
@@ -72,6 +77,10 @@ export const useMapStore = create<MapState>((set) => ({
     }),
   // Measure mode is transient (not persisted).
   toggleMeasure: () => set((state) => ({ measureMode: !state.measureMode })),
+  setUnits: (u) => {
+    savePref("units", u);
+    set({ units: u });
+  },
 }));
 
 export const showAir = (m: LayerMode) => m === "air" || m === "both";

@@ -3,11 +3,13 @@ import { useVesselStore } from "../store/useVesselStore";
 import { useMapStore } from "../store/useMapStore";
 import { useAlertsStore } from "../store/useAlertsStore";
 import { classifyVessel, hasVesselPosition, vesselColor, vesselName } from "../lib/vessel";
+import { formatSpeed } from "../lib/units";
 
 export default function VesselListItem({ v }: { v: TrackedVessel }) {
   const selectedMmsi = useVesselStore((s) => s.selectedMmsi);
   const select = useVesselStore((s) => s.select);
   const flyTo = useMapStore((s) => s.flyTo);
+  const units = useMapStore((s) => s.units);
   const watched = useAlertsStore((s) => s.watchedSea.has(v.mmsi));
   const selected = v.mmsi === selectedMmsi;
 
@@ -24,7 +26,7 @@ export default function VesselListItem({ v }: { v: TrackedVessel }) {
         {vesselName(v)}
       </span>
       <span className="li-type">{v.type ?? "—"}</span>
-      <span className="li-alt">{typeof v.sog === "number" ? `${v.sog.toFixed(0)} kn` : "—"}</span>
+      <span className="li-alt">{typeof v.sog === "number" ? formatSpeed(v.sog, units) : "—"}</span>
       <span className="li-spd">{v.country ?? "—"}</span>
     </button>
   );
