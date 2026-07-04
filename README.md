@@ -33,6 +33,8 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
 - 🎯 **Follow mode** keeps a selected aircraft centered as it moves
 - 📡 **Nearby contacts** — each detail panel lists the closest aircraft & vessels
   with distance (in your chosen units) and compass bearing; tap one to jump to it
+- ⚠️ **Convergence warnings** — nearby contacts on a closing course are flagged
+  with their closest point of approach (CPA) and time to it
 - 🔗 **Shareable deep-links** — the selected aircraft is encoded in the URL
   (`#sel=<hex>`) and restored on reload
 - 🔎 Search/filter across both aircraft and vessels

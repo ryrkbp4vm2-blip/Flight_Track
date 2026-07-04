@@ -9,6 +9,7 @@ import { nearest, compassPoint } from "../web/src/lib/proximity.ts";
 import { solarPosition, subsolarPoint, terminator } from "../web/src/lib/sun.ts";
 import { sparkline, nearestSparkPoint } from "../web/src/lib/spark.ts";
 import { buildSample, SAMPLE_EPOCH } from "../server/src/sampleData.ts";
+import { closestPointOfApproach, isConverging } from "../web/src/lib/cpa.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -264,6 +265,47 @@ test("sample feed dead-reckons aircraft over time", () => {
   const ground = t1.ac.find((a) => a.hex === "8a02d7")!;
   assert.equal(ground.alt_baro, "ground");
   assert.equal(ground.baro_rate, 0);
+});
+
+test("cpa: head-on, crossing, opening, and no relative motion", () => {
+  // Head-on at the equator, 60 nm apart, 300 kt each → CPA ≈ 0 in 6 minutes.
+  const headOn = closestPointOfApproach(
+    { lat: 0, lon: 0, speedKt: 300, headingDeg: 90 },
+    { lat: 0, lon: 1, speedKt: 300, headingDeg: 270 },
+  )!;
+  assert.ok(Math.abs(headOn.distanceNowNm - 60) < 0.2);
+  assert.ok(headOn.cpaNm < 0.01, `cpa ${headOn.cpaNm}`);
+  assert.ok(Math.abs(headOn.minutesToCpa - 6) < 0.1, `t ${headOn.minutesToCpa}`);
+  assert.equal(headOn.closing, true);
+  assert.equal(isConverging(headOn), true);
+
+  // Crossing offset 6 nm north of a stationary contact → CPA ≈ 6 nm.
+  const crossing = closestPointOfApproach(
+    { lat: 0, lon: 0, speedKt: 0, headingDeg: 0 },
+    { lat: 0.1, lon: 1, speedKt: 600, headingDeg: 270 },
+  )!;
+  assert.ok(Math.abs(crossing.cpaNm - 6) < 0.1, `cpa ${crossing.cpaNm}`);
+  assert.equal(crossing.closing, true);
+  assert.equal(isConverging(crossing), true);
+
+  // Moving directly away → opening, CPA is the current range, never flagged.
+  const opening = closestPointOfApproach(
+    { lat: 0, lon: 0, speedKt: 0, headingDeg: 0 },
+    { lat: 0, lon: 1, speedKt: 300, headingDeg: 90 },
+  )!;
+  assert.equal(opening.closing, false);
+  assert.ok(Math.abs(opening.cpaNm - opening.distanceNowNm) < 1e-9);
+  assert.equal(isConverging(opening), false);
+
+  // Identical velocity → constant separation → null.
+  assert.equal(
+    closestPointOfApproach(
+      { lat: 0, lon: 0, speedKt: 400, headingDeg: 45 },
+      { lat: 1, lon: 1, speedKt: 400, headingDeg: 45 },
+    ),
+    null,
+  );
+  assert.equal(isConverging(null), false);
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {

@@ -631,6 +631,12 @@ body {
   min-width: 54px;
   text-align: right;
 }
+.nearby-cpa {
+  grid-column: 2 / -1;
+  font-size: 11px;
+  color: #ffb74d;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---- Layer toggle ---- */
 .layer-toggle {
