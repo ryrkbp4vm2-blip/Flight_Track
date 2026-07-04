@@ -53,6 +53,8 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
   (m · km/h · km) and **Imperial** (ft · mph · mi) from the Alerts tab; the choice
   is remembered and applies to detail panels, list rows, the measure tool and
   range rings
+- ⬇️ **Snapshot export** — download the current picture as GeoJSON (contacts +
+  trails, for GIS tools) or CSV (for spreadsheets) from the Stats tab
 - 📲 Installable PWA with offline app shell
 
 ## How it works

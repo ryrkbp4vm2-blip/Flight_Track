@@ -4,6 +4,19 @@ import { useVesselStore } from "../store/useVesselStore";
 import { classifyAircraft, classLabel, type AircraftClass } from "../lib/classify";
 import { classifyVessel, vesselColor, vesselLabel, type VesselClass } from "../lib/vessel";
 import { isEmergency } from "../lib/emergency";
+import { snapshotCsv, snapshotGeoJSON } from "../lib/export";
+
+function download(name: string, mime: string, text: string) {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+const stamp = () => new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
 function countBy<T, K extends string>(items: T[], key: (t: T) => K): [K, number][] {
   const m = new Map<K, number>();
@@ -85,6 +98,45 @@ export default function StatsView() {
       <div className="stats-section">
         <h3>⚓ Vessels by navy</h3>
         <Bars rows={sea.byNavy} total={sea.total} />
+      </div>
+      <div className="stats-section">
+        <h3>⇩ Export snapshot</h3>
+        <div className="export-actions">
+          <button
+            className="detail-btn"
+            onClick={() => {
+              const air = useAircraftStore.getState();
+              const seaState = useVesselStore.getState();
+              const fc = snapshotGeoJSON(
+                [...air.aircraft.values()],
+                [...seaState.vessels.values()],
+                air.trails,
+                seaState.trails,
+              );
+              download(`miltrack-${stamp()}.geojson`, "application/geo+json", JSON.stringify(fc, null, 2));
+            }}
+          >
+            GeoJSON
+          </button>
+          <button
+            className="detail-btn"
+            onClick={() =>
+              download(
+                `miltrack-${stamp()}.csv`,
+                "text/csv",
+                snapshotCsv(
+                  [...useAircraftStore.getState().aircraft.values()],
+                  [...useVesselStore.getState().vessels.values()],
+                ),
+              )
+            }
+          >
+            CSV
+          </button>
+        </div>
+        <p className="export-hint">
+          Current contacts (and trails, in GeoJSON) for GIS tools or spreadsheets.
+        </p>
       </div>
     </div>
   );

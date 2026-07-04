@@ -10,6 +10,7 @@ import { solarPosition, subsolarPoint, terminator } from "../web/src/lib/sun.ts"
 import { sparkline, nearestSparkPoint } from "../web/src/lib/spark.ts";
 import { buildSample, SAMPLE_EPOCH } from "../server/src/sampleData.ts";
 import { closestPointOfApproach, isConverging } from "../web/src/lib/cpa.ts";
+import { csvField, snapshotCsv, snapshotGeoJSON } from "../web/src/lib/export.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -306,6 +307,46 @@ test("cpa: head-on, crossing, opening, and no relative motion", () => {
     null,
   );
   assert.equal(isConverging(null), false);
+});
+
+test("export: CSV escaping and GeoJSON structure", () => {
+  assert.equal(csvField("plain"), "plain");
+  assert.equal(csvField('with "quotes", and commas'), '"with ""quotes"", and commas"');
+  assert.equal(csvField(undefined), "");
+
+  const air = [
+    tracked({ hex: "a1", flight: "RCH285 ", t: "C17", alt_baro: 33000, gs: 451.4, track: 78, lat: 38.95, lon: -77.46, squawk: "1234" }),
+    tracked({ hex: "nopos" }), // no position → excluded everywhere
+  ];
+  const sea = [
+    { mmsi: "36900myn", name: "USS Cole, DDG", type: "Destroyer", country: "USA", sog: 18, cog: 90, lat: 36.9, lon: -76.0, lastSeen: 0 },
+  ];
+
+  const csv = snapshotCsv(air, sea);
+  const lines = csv.trim().split("\n");
+  assert.equal(lines.length, 3); // header + 1 air + 1 sea
+  assert.match(lines[0], /^domain,id,name/);
+  assert.match(lines[1], /^air,a1,RCH285,C17,heavy,,38.95,-77.46,33000,451,78,1234,$/);
+  assert.match(lines[2], /^sea,36900myn,"USS Cole, DDG",Destroyer,combatant,USA/);
+
+  const trailPts = [
+    { lat: 0, lon: 0, alt: 100, t: 0 },
+    { lat: 1, lon: 1, alt: 200, t: 1 },
+  ];
+  const fc = snapshotGeoJSON(air, sea, new Map([["a1", trailPts]]), new Map([["solo", [trailPts[0]]]]));
+  assert.equal(fc.type, "FeatureCollection");
+  // 2 contact points + 1 air trail; the single-point sea trail is skipped.
+  assert.equal(fc.features.length, 3);
+  const pt = fc.features[0];
+  assert.equal(pt.geometry.type, "Point");
+  // GeoJSON is [lon, lat].
+  assert.deepEqual(pt.geometry.coordinates, [-77.46, 38.95]);
+  assert.equal(pt.properties.name, "RCH285");
+  const line = fc.features[2];
+  assert.equal(line.geometry.type, "LineString");
+  assert.equal(line.properties.kind, "trail");
+  // Round-trips through JSON cleanly.
+  assert.equal(JSON.parse(JSON.stringify(fc)).features.length, 3);
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {
