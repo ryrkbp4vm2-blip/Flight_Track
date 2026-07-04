@@ -12,6 +12,7 @@ import { buildSample, SAMPLE_EPOCH } from "../server/src/sampleData.ts";
 import { closestPointOfApproach, isConverging } from "../web/src/lib/cpa.ts";
 import { csvField, snapshotCsv, snapshotGeoJSON } from "../web/src/lib/export.ts";
 import { cycleId } from "../web/src/lib/cycle.ts";
+import { clipTrail, positionAt, playbackLabel } from "../web/src/lib/playback.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -359,6 +360,36 @@ test("cycleId wraps and handles empty/unknown selections", () => {
   assert.equal(cycleId(ids, null, -1), "c"); // no selection → last
   assert.equal(cycleId(ids, "zz", 1), "a"); // unknown → first
   assert.equal(cycleId([], "a", 1), null);
+});
+
+test("playback: trail clipping, position interpolation, labels", () => {
+  const pts = [
+    { lat: 0, lon: 0, alt: 0, t: 1000 },
+    { lat: 1, lon: 2, alt: 0, t: 2000 },
+    { lat: 2, lon: 4, alt: 0, t: 3000 },
+  ];
+
+  // Clip keeps points at or before the moment.
+  assert.equal(clipTrail(pts, 2000).length, 2);
+  assert.equal(clipTrail(pts, 1999).length, 1);
+  assert.equal(clipTrail(pts, 500).length, 0);
+  assert.equal(clipTrail(pts, 9999).length, 3);
+
+  // Before the first record the contact didn't exist.
+  assert.equal(positionAt(pts, 500), null);
+  assert.equal(positionAt([], 500), null);
+  // After the last record, clamp to it.
+  assert.deepEqual(positionAt(pts, 9999), { lat: 2, lon: 4 });
+  // Midway between samples, interpolate linearly.
+  assert.deepEqual(positionAt(pts, 1500), { lat: 0.5, lon: 1 });
+  assert.deepEqual(positionAt(pts, 2500), { lat: 1.5, lon: 3 });
+  // Exactly on a sample.
+  assert.deepEqual(positionAt(pts, 2000), { lat: 1, lon: 2 });
+
+  assert.equal(playbackLabel(0), "LIVE");
+  assert.equal(playbackLabel(-90), "T−1:30");
+  assert.equal(playbackLabel(-300), "T−5:00");
+  assert.equal(playbackLabel(-5), "T−0:05");
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {

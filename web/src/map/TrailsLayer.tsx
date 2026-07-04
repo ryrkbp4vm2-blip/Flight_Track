@@ -4,6 +4,7 @@ import L from "leaflet";
 import { useAircraftStore } from "../store/useAircraftStore";
 import { useMapStore } from "../store/useMapStore";
 import { COLOR_TRAIL, COLOR_TRAIL_SELECTED } from "./mapConfig";
+import { clipTrail } from "../lib/playback";
 
 /**
  * Draws aircraft trails as polylines on the canvas renderer. By default only
@@ -19,12 +20,20 @@ export default function TrailsLayer() {
     const lines = new Map<string, L.Polyline>();
 
     function render() {
-      const { trails, selectedHex } = useAircraftStore.getState();
-      const showAllTrails = useMapStore.getState().showAllTrails;
+      const { trails: rawTrails, selectedHex } = useAircraftStore.getState();
+      const { showAllTrails, playback, playbackOffsetSec } = useMapStore.getState();
+
+      // While scrubbing, trails end at the playback moment.
+      let trails = rawTrails;
+      if (playback && playbackOffsetSec < 0) {
+        const tMs = Date.now() + playbackOffsetSec * 1000;
+        trails = new Map();
+        for (const [hex, pts] of rawTrails) trails.set(hex, clipTrail(pts, tMs));
+      }
 
       // Which hexes get a trail this frame.
       const wanted = new Set<string>();
-      if (showAllTrails) {
+      if (showAllTrails || playback) {
         for (const [hex, pts] of trails) if (pts.length > 1) wanted.add(hex);
       } else if (selectedHex && (trails.get(selectedHex)?.length ?? 0) > 1) {
         wanted.add(selectedHex);

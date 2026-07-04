@@ -12,6 +12,8 @@ export default function MapControls() {
   const toggleProjection = useMapStore((s) => s.toggleProjection);
   const terminator = useMapStore((s) => s.terminator);
   const toggleTerminator = useMapStore((s) => s.toggleTerminator);
+  const playback = useMapStore((s) => s.playback);
+  const togglePlayback = useMapStore((s) => s.togglePlayback);
   const measureMode = useMapStore((s) => s.measureMode);
   const toggleMeasure = useMapStore((s) => s.toggleMeasure);
 
@@ -74,6 +76,14 @@ export default function MapControls() {
         className={terminator ? "on" : ""}
       >
         ☾
+      </button>
+      <button
+        onClick={togglePlayback}
+        aria-pressed={playback}
+        title="Time playback of the recent picture"
+        className={playback ? "on" : ""}
+      >
+        ⏱
       </button>
       <button
         onClick={toggleMeasure}

@@ -25,6 +25,10 @@ interface MapState {
   terminator: boolean;
   /** Two-click distance/bearing measure mode. */
   measureMode: boolean;
+  /** Time-scrub playback of the recent picture. */
+  playback: boolean;
+  /** Rewind offset in seconds (≤ 0; 0 = live). */
+  playbackOffsetSec: number;
   /** Unit system for altitude / speed / distance display. */
   units: UnitSystem;
   flyTo: (lat: number, lon: number) => void;
@@ -36,6 +40,8 @@ interface MapState {
   toggleProjection: () => void;
   toggleTerminator: () => void;
   toggleMeasure: () => void;
+  togglePlayback: () => void;
+  setPlaybackOffset: (sec: number) => void;
   setUnits: (u: UnitSystem) => void;
 }
 
@@ -50,6 +56,8 @@ export const useMapStore = create<MapState>((set) => ({
   projection: loadPref("projection", false),
   terminator: loadPref("terminator", false),
   measureMode: false,
+  playback: false,
+  playbackOffsetSec: 0,
   units: loadPref<UnitSystem>("units", "aviation"),
   flyTo: (lat, lon) =>
     set((state) => ({ flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 } })),
@@ -97,6 +105,10 @@ export const useMapStore = create<MapState>((set) => ({
     }),
   // Measure mode is transient (not persisted).
   toggleMeasure: () => set((state) => ({ measureMode: !state.measureMode })),
+  // Playback is transient too; entering it starts one minute back.
+  togglePlayback: () =>
+    set((state) => ({ playback: !state.playback, playbackOffsetSec: state.playback ? 0 : -60 })),
+  setPlaybackOffset: (sec) => set({ playbackOffsetSec: Math.min(0, sec) }),
   setUnits: (u) => {
     savePref("units", u);
     set({ units: u });

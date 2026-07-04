@@ -638,6 +638,54 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- Time playback ---- */
+.playback-on .leaflet-marker-pane {
+  opacity: 0.25;
+}
+.playback-bar {
+  position: absolute;
+  z-index: 900;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--safe-bottom, 0px) + 52px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  width: min(440px, calc(100vw - 24px));
+  backdrop-filter: blur(8px);
+}
+.playback-title {
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.playback-bar input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+.playback-time {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  min-width: 52px;
+  text-align: right;
+}
+.playback-time.live {
+  color: #7ee0b8;
+}
+.playback-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px;
+}
+
 /* ---- Keyboard help ---- */
 .kbd-backdrop {
   position: fixed;

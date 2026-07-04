@@ -11,6 +11,8 @@ import FilterChips from "./components/FilterChips";
 import AlertToasts from "./components/AlertToasts";
 import Legend from "./components/Legend";
 import KeyboardHelp from "./components/KeyboardHelp";
+import PlaybackBar from "./components/PlaybackBar";
+import { useMapStore } from "./store/useMapStore";
 import { useAlertsStore } from "./store/useAlertsStore";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
@@ -31,6 +33,7 @@ export default function App() {
   });
   const unread = useAlertsStore((s) => s.unread);
   const markRead = useAlertsStore((s) => s.markRead);
+  const playback = useMapStore((s) => s.playback);
 
   function openAlerts() {
     setListTab("alerts");
@@ -39,7 +42,7 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app${playback ? " playback-on" : ""}`}>
       <MapView />
 
       <header className="top-bar">
@@ -85,6 +88,7 @@ export default function App() {
       <DetailPanel />
       <VesselDetailPanel />
       <StatusBar />
+      {playback && <PlaybackBar />}
       {helpOpen && <KeyboardHelp onClose={() => setHelpOpen(false)} />}
     </div>
   );

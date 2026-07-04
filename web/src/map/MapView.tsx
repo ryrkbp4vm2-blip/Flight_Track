@@ -16,6 +16,7 @@ import TrailsLayer from "./TrailsLayer";
 import TerminatorLayer from "./TerminatorLayer";
 import RangeRingsLayer from "./RangeRingsLayer";
 import ProjectionLayer from "./ProjectionLayer";
+import PlaybackLayer from "./PlaybackLayer";
 import MeasureLayer from "./MeasureLayer";
 import { setMapInstance } from "./mapInstance";
 import { loadPref, savePref } from "../lib/persist";
@@ -119,6 +120,7 @@ export default function MapView() {
       <ProjectionLayer />
       <VesselLayer />
       <AircraftLayer />
+      <PlaybackLayer />
       <MeasureLayer />
       <FlyController />
       <ViewController />
