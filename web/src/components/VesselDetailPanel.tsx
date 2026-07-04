@@ -10,6 +10,7 @@ import {
 } from "../lib/vessel";
 import { countryFlag } from "../lib/icaoCountry";
 import { formatSpeed, formatLength } from "../lib/units";
+import NearbyContacts from "./NearbyContacts";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -87,6 +88,9 @@ export default function VesselDetailPanel() {
             Center
           </button>
         </div>
+      )}
+      {hasVesselPosition(v) && (
+        <NearbyContacts lat={v.lat} lon={v.lon} selfDomain="sea" selfId={v.mmsi} />
       )}
     </div>
   );

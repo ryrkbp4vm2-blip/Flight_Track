@@ -5,6 +5,7 @@ import { classifyAircraft } from "../web/src/lib/classify.ts";
 import { emergencyInfo, isEmergency } from "../web/src/lib/emergency.ts";
 import { classifyVessel, vesselName, vesselHeading, hasVesselPosition } from "../web/src/lib/vessel.ts";
 import { haversineNm, bearingDeg, destinationPoint, projectedTrack } from "../web/src/lib/geo.ts";
+import { nearest, compassPoint } from "../web/src/lib/proximity.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -146,6 +147,32 @@ test("geo: dead-reckoning destination and projected track", () => {
   const track = projectedTrack({ lat: 0, lon: 0 }, 90, 480);
   assert.deepEqual(track.map((t) => t.minutes), [5, 10, 15]);
   assert.ok(Math.abs(haversineNm({ lat: 0, lon: 0 }, track[2].point) - 120) < 0.5);
+});
+
+test("proximity: nearest ranking and compass points", () => {
+  const origin = { lat: 0, lon: 0 };
+  const items = [
+    { id: "far", lat: 0, lon: 3 },
+    { id: "near", lat: 0, lon: 1 },
+    { id: "mid", lat: 0, lon: 2 },
+  ];
+  const ranked = nearest(origin, items, 2);
+  assert.deepEqual(ranked.map((r) => r.item.id), ["near", "mid"]);
+  assert.equal(ranked.length, 2);
+  // Due-east neighbour bears 090°.
+  assert.ok(Math.abs(ranked[0].bearing - 90) < 0.001);
+  assert.ok(Math.abs(ranked[0].distanceNm - 60) < 0.2);
+  // Self-distance is zero; nearest of an empty list is empty.
+  assert.equal(nearest(origin, [origin]).length, 1);
+  assert.equal(nearest(origin, []).length, 0);
+
+  assert.equal(compassPoint(0), "N");
+  assert.equal(compassPoint(45), "NE");
+  assert.equal(compassPoint(90), "E");
+  assert.equal(compassPoint(180), "S");
+  assert.equal(compassPoint(270), "W");
+  assert.equal(compassPoint(350), "N");
+  assert.equal(compassPoint(-90), "W");
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {

@@ -4,6 +4,7 @@ import { useAlertsStore } from "../store/useAlertsStore";
 import { classLabel, classifyAircraft } from "../lib/classify";
 import { emergencyInfo } from "../lib/emergency";
 import { icaoCountry } from "../lib/icaoCountry";
+import NearbyContacts from "./NearbyContacts";
 import {
   callsign,
   formatAltitude,
@@ -105,6 +106,9 @@ export default function DetailPanel() {
             {followSelected ? "Following ✓" : "Follow"}
           </button>
         </div>
+      )}
+      {hasPosition(ac) && (
+        <NearbyContacts lat={ac.lat} lon={ac.lon} selfDomain="air" selfId={ac.hex} />
       )}
     </div>
   );

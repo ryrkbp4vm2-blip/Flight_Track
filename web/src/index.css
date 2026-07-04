@@ -516,6 +516,62 @@ body {
   color: var(--selected);
 }
 
+/* ---- Nearby contacts ---- */
+.nearby {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.nearby-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.nearby-row {
+  display: grid;
+  grid-template-columns: 16px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 5px 2px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.nearby-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.nearby-icon {
+  text-align: center;
+}
+.nearby-icon.air {
+  color: var(--accent);
+}
+.nearby-icon.sea {
+  color: #7ee0b8;
+}
+.nearby-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nearby-dist {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.nearby-brg {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  min-width: 54px;
+  text-align: right;
+}
+
 /* ---- Layer toggle ---- */
 .layer-toggle {
   position: absolute;

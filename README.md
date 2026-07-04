@@ -31,6 +31,8 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
 - 👆 Tap any contact for details (aircraft: class, callsign, type, reg, hex,
   squawk, altitude, speed, heading; vessel: type, navy, hull, MMSI, speed, course)
 - 🎯 **Follow mode** keeps a selected aircraft centered as it moves
+- 📡 **Nearby contacts** — each detail panel lists the closest aircraft & vessels
+  with distance (in your chosen units) and compass bearing; tap one to jump to it
 - 🔗 **Shareable deep-links** — the selected aircraft is encoded in the URL
   (`#sel=<hex>`) and restored on reload
 - 🔎 Search/filter across both aircraft and vessels
