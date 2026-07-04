@@ -11,6 +11,7 @@ import { sparkline, nearestSparkPoint } from "../web/src/lib/spark.ts";
 import { buildSample, SAMPLE_EPOCH } from "../server/src/sampleData.ts";
 import { closestPointOfApproach, isConverging } from "../web/src/lib/cpa.ts";
 import { csvField, snapshotCsv, snapshotGeoJSON } from "../web/src/lib/export.ts";
+import { cycleId } from "../web/src/lib/cycle.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -347,6 +348,17 @@ test("export: CSV escaping and GeoJSON structure", () => {
   assert.equal(line.properties.kind, "trail");
   // Round-trips through JSON cleanly.
   assert.equal(JSON.parse(JSON.stringify(fc)).features.length, 3);
+});
+
+test("cycleId wraps and handles empty/unknown selections", () => {
+  const ids = ["a", "b", "c"];
+  assert.equal(cycleId(ids, "a", 1), "b");
+  assert.equal(cycleId(ids, "c", 1), "a"); // wraps forward
+  assert.equal(cycleId(ids, "a", -1), "c"); // wraps backward
+  assert.equal(cycleId(ids, null, 1), "a"); // no selection → first
+  assert.equal(cycleId(ids, null, -1), "c"); // no selection → last
+  assert.equal(cycleId(ids, "zz", 1), "a"); // unknown → first
+  assert.equal(cycleId([], "a", 1), null);
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {

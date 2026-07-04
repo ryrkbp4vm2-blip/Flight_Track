@@ -38,6 +38,9 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
 - 🔗 **Shareable deep-links** — the selected aircraft is encoded in the URL
   (`#sel=<hex>`) and restored on reload
 - 🔎 Search/filter across both aircraft and vessels
+- ⌨️ **Keyboard driven** — `J`/`K` cycle contacts, one-key toggles for follow,
+  watch, trails, rings, projection, terminator, measure and units; press `?`
+  for the full list
 - 📋 Sortable, tabbed list view (Aircraft | Vessels)
 - 🛰️ Flight/voyage trails for the selected contact (or all aircraft trails)
 - 📈 **Altitude profile** — a hoverable sparkline in the aircraft detail panel

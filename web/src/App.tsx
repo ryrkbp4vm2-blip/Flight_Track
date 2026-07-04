@@ -10,6 +10,7 @@ import MapControls from "./components/MapControls";
 import FilterChips from "./components/FilterChips";
 import AlertToasts from "./components/AlertToasts";
 import Legend from "./components/Legend";
+import KeyboardHelp from "./components/KeyboardHelp";
 import { useAlertsStore } from "./store/useAlertsStore";
 import { usePolling } from "./hooks/usePolling";
 import { useUrlSync } from "./hooks/useUrlSync";
@@ -19,10 +20,15 @@ import { useAlerts } from "./hooks/useAlerts";
 export default function App() {
   usePolling();
   useUrlSync();
-  useKeyboard();
   useAlerts();
   const [listOpen, setListOpen] = useState(false);
   const [listTab, setListTab] = useState<Tab>("air");
+  const [helpOpen, setHelpOpen] = useState(false);
+  useKeyboard({
+    open: helpOpen,
+    toggle: () => setHelpOpen((v) => !v),
+    close: () => setHelpOpen(false),
+  });
   const unread = useAlertsStore((s) => s.unread);
   const markRead = useAlertsStore((s) => s.markRead);
 
@@ -79,6 +85,7 @@ export default function App() {
       <DetailPanel />
       <VesselDetailPanel />
       <StatusBar />
+      {helpOpen && <KeyboardHelp onClose={() => setHelpOpen(false)} />}
     </div>
   );
 }
