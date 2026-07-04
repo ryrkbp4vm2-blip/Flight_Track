@@ -6,6 +6,7 @@ import { emergencyInfo, isEmergency } from "../web/src/lib/emergency.ts";
 import { classifyVessel, vesselName, vesselHeading, hasVesselPosition } from "../web/src/lib/vessel.ts";
 import { haversineNm, bearingDeg, destinationPoint, projectedTrack } from "../web/src/lib/geo.ts";
 import { nearest, compassPoint } from "../web/src/lib/proximity.ts";
+import { solarPosition, subsolarPoint, terminator } from "../web/src/lib/sun.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -173,6 +174,30 @@ test("proximity: nearest ranking and compass points", () => {
   assert.equal(compassPoint(270), "W");
   assert.equal(compassPoint(350), "N");
   assert.equal(compassPoint(-90), "W");
+});
+
+test("sun: declination at solstices/equinox and terminator shape", () => {
+  // Solar declination ≈ +23.4° at the June solstice, −23.4° at December.
+  const june = solarPosition(new Date("2023-06-21T12:00:00Z")).declination;
+  const dec = solarPosition(new Date("2023-12-22T12:00:00Z")).declination;
+  const equinox = solarPosition(new Date("2023-03-20T21:00:00Z")).declination;
+  assert.ok(Math.abs(june - 23.4) < 0.6, `june ${june}`);
+  assert.ok(Math.abs(dec + 23.4) < 0.6, `dec ${dec}`);
+  assert.ok(Math.abs(equinox) < 1, `equinox ${equinox}`);
+
+  // The subsolar latitude equals the declination and longitude is in range.
+  const sun = subsolarPoint(new Date("2023-06-21T12:00:00Z"));
+  assert.ok(Math.abs(sun.lat - june) < 1e-9);
+  assert.ok(sun.lon >= -180 && sun.lon <= 180);
+
+  // The terminator curve spans every longitude with valid latitudes; in June
+  // the south pole is the dark cap.
+  const t = terminator(new Date("2023-06-21T12:00:00Z"), 2);
+  assert.equal(t.curve.length, 181);
+  assert.equal(t.curve[0].lon, -180);
+  assert.equal(t.curve[t.curve.length - 1].lon, 180);
+  assert.ok(t.curve.every((p) => p.lat >= -90 && p.lat <= 90 && Number.isFinite(p.lat)));
+  assert.equal(t.nightCapLat, -90);
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {

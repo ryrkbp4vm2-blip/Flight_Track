@@ -21,6 +21,8 @@ interface MapState {
   rangeRings: boolean;
   /** Draw the projected (dead-reckoned) track ahead of the selected contact. */
   projection: boolean;
+  /** Shade the night hemisphere (day/night terminator overlay). */
+  terminator: boolean;
   /** Two-click distance/bearing measure mode. */
   measureMode: boolean;
   /** Unit system for altitude / speed / distance display. */
@@ -32,6 +34,7 @@ interface MapState {
   toggleSeaClass: (c: VesselClass) => void;
   toggleRangeRings: () => void;
   toggleProjection: () => void;
+  toggleTerminator: () => void;
   toggleMeasure: () => void;
   setUnits: (u: UnitSystem) => void;
 }
@@ -45,6 +48,7 @@ export const useMapStore = create<MapState>((set) => ({
   seaClassFilter: new Set(loadPref<VesselClass[]>("seaClassFilter", [])),
   rangeRings: loadPref("rangeRings", false),
   projection: loadPref("projection", false),
+  terminator: loadPref("terminator", false),
   measureMode: false,
   units: loadPref<UnitSystem>("units", "aviation"),
   flyTo: (lat, lon) =>
@@ -84,6 +88,12 @@ export const useMapStore = create<MapState>((set) => ({
       const projection = !state.projection;
       savePref("projection", projection);
       return { projection };
+    }),
+  toggleTerminator: () =>
+    set((state) => {
+      const terminator = !state.terminator;
+      savePref("terminator", terminator);
+      return { terminator };
     }),
   // Measure mode is transient (not persisted).
   toggleMeasure: () => set((state) => ({ measureMode: !state.measureMode })),

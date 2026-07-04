@@ -10,6 +10,8 @@ export default function MapControls() {
   const toggleRangeRings = useMapStore((s) => s.toggleRangeRings);
   const projection = useMapStore((s) => s.projection);
   const toggleProjection = useMapStore((s) => s.toggleProjection);
+  const terminator = useMapStore((s) => s.terminator);
+  const toggleTerminator = useMapStore((s) => s.toggleTerminator);
   const measureMode = useMapStore((s) => s.measureMode);
   const toggleMeasure = useMapStore((s) => s.toggleMeasure);
 
@@ -64,6 +66,14 @@ export default function MapControls() {
         className={projection ? "on" : ""}
       >
         ⇢
+      </button>
+      <button
+        onClick={toggleTerminator}
+        aria-pressed={terminator}
+        title="Day / night terminator"
+        className={terminator ? "on" : ""}
+      >
+        ☾
       </button>
       <button
         onClick={toggleMeasure}

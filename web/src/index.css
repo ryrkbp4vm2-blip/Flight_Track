@@ -787,6 +787,14 @@ body {
   white-space: nowrap;
   pointer-events: none;
 }
+.subsolar {
+  color: #ffd23f;
+  font-size: 16px;
+  line-height: 22px;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(255, 210, 63, 0.9);
+  pointer-events: none;
+}
 .measure-label {
   color: #ffd23f;
   font-size: 12px;

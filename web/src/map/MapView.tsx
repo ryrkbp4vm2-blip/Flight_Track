@@ -13,6 +13,7 @@ import {
 import AircraftLayer from "./AircraftLayer";
 import VesselLayer from "./VesselLayer";
 import TrailsLayer from "./TrailsLayer";
+import TerminatorLayer from "./TerminatorLayer";
 import RangeRingsLayer from "./RangeRingsLayer";
 import ProjectionLayer from "./ProjectionLayer";
 import MeasureLayer from "./MeasureLayer";
@@ -112,6 +113,7 @@ export default function MapView() {
       className="map-root"
     >
       <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} maxZoom={MAX_ZOOM} />
+      <TerminatorLayer />
       <TrailsLayer />
       <RangeRingsLayer />
       <ProjectionLayer />
