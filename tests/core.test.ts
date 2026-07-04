@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { classifyAircraft } from "../web/src/lib/classify.ts";
 import { emergencyInfo, isEmergency } from "../web/src/lib/emergency.ts";
 import { classifyVessel, vesselName, vesselHeading, hasVesselPosition } from "../web/src/lib/vessel.ts";
-import { haversineNm, bearingDeg } from "../web/src/lib/geo.ts";
+import { haversineNm, bearingDeg, destinationPoint, projectedTrack } from "../web/src/lib/geo.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -128,6 +128,24 @@ test("geo: distance, bearing, formatting", () => {
   assert.equal(haversineNm({ lat: 10, lon: 20 }, { lat: 10, lon: 20 }), 0);
   assert.ok(Math.abs(bearingDeg({ lat: 0, lon: 0 }, { lat: 1, lon: 0 }) - 0) < 0.001);
   assert.ok(Math.abs(bearingDeg({ lat: 0, lon: 0 }, { lat: 0, lon: 1 }) - 90) < 0.001);
+});
+
+test("geo: dead-reckoning destination and projected track", () => {
+  // 60 nm due north from the equator ≈ 1° of latitude.
+  const north = destinationPoint({ lat: 0, lon: 0 }, 0, 60);
+  assert.ok(Math.abs(north.lat - 1) < 0.02);
+  assert.ok(Math.abs(north.lon) < 1e-6);
+  // 60 nm due east at the equator ≈ 1° of longitude.
+  const east = destinationPoint({ lat: 0, lon: 0 }, 90, 60);
+  assert.ok(Math.abs(east.lon - 1) < 0.02);
+  assert.ok(Math.abs(east.lat) < 1e-6);
+  // Round-trip: measuring back to the origin returns the distance travelled.
+  assert.ok(Math.abs(haversineNm({ lat: 10, lon: 20 }, destinationPoint({ lat: 10, lon: 20 }, 45, 100)) - 100) < 0.01);
+
+  // Projected track: 480 kt for 15 min in 5-min steps → 40/80/120 nm ahead.
+  const track = projectedTrack({ lat: 0, lon: 0 }, 90, 480);
+  assert.deepEqual(track.map((t) => t.minutes), [5, 10, 15]);
+  assert.ok(Math.abs(haversineNm({ lat: 0, lon: 0 }, track[2].point) - 120) < 0.5);
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {

@@ -30,4 +30,42 @@ export function bearingDeg(a: LatLon, b: LatLon): number {
   return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
 
+/**
+ * Great-circle destination: the point reached from `from` after travelling
+ * `distanceNm` nautical miles along an initial `bearing` (degrees). Used for
+ * dead-reckoning a contact's projected track.
+ */
+export function destinationPoint(from: LatLon, bearing: number, distanceNm: number): LatLon {
+  const ang = distanceNm / R_NM; // angular distance in radians
+  const brg = toRad(bearing);
+  const lat1 = toRad(from.lat);
+  const lon1 = toRad(from.lon);
+  const sinLat2 =
+    Math.sin(lat1) * Math.cos(ang) + Math.cos(lat1) * Math.sin(ang) * Math.cos(brg);
+  const lat2 = Math.asin(Math.min(1, Math.max(-1, sinLat2)));
+  const y = Math.sin(brg) * Math.sin(ang) * Math.cos(lat1);
+  const x = Math.cos(ang) - Math.sin(lat1) * sinLat2;
+  const lon2 = lon1 + Math.atan2(y, x);
+  // Normalise longitude to −180…180.
+  return { lat: toDeg(lat2), lon: (((toDeg(lon2) + 540) % 360) - 180) };
+}
+
+/**
+ * Dead-reckoned track ahead of a moving contact: the projected positions at
+ * each `stepMin` interval up to `horizonMin`, assuming constant heading/speed.
+ */
+export function projectedTrack(
+  from: LatLon,
+  bearing: number,
+  speedKt: number,
+  horizonMin = 15,
+  stepMin = 5,
+): { minutes: number; point: LatLon }[] {
+  const out: { minutes: number; point: LatLon }[] = [];
+  for (let m = stepMin; m <= horizonMin; m += stepMin) {
+    out.push({ minutes: m, point: destinationPoint(from, bearing, speedKt * (m / 60)) });
+  }
+  return out;
+}
+
 export const NM_TO_KM = 1.852;

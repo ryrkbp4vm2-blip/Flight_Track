@@ -8,6 +8,8 @@ export default function MapControls() {
   const [locating, setLocating] = useState(false);
   const rangeRings = useMapStore((s) => s.rangeRings);
   const toggleRangeRings = useMapStore((s) => s.toggleRangeRings);
+  const projection = useMapStore((s) => s.projection);
+  const toggleProjection = useMapStore((s) => s.toggleProjection);
   const measureMode = useMapStore((s) => s.measureMode);
   const toggleMeasure = useMapStore((s) => s.toggleMeasure);
 
@@ -54,6 +56,14 @@ export default function MapControls() {
         className={rangeRings ? "on" : ""}
       >
         ◉
+      </button>
+      <button
+        onClick={toggleProjection}
+        aria-pressed={projection}
+        title="Projected track (next 15 min) of the selected contact"
+        className={projection ? "on" : ""}
+      >
+        ⇢
       </button>
       <button
         onClick={toggleMeasure}

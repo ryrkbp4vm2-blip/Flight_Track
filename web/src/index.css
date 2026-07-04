@@ -723,6 +723,14 @@ body {
   white-space: nowrap;
   pointer-events: none;
 }
+.proj-label {
+  color: #7ee0b8;
+  font-size: 10px;
+  font-weight: 600;
+  text-shadow: 0 0 3px #000;
+  white-space: nowrap;
+  pointer-events: none;
+}
 .measure-label {
   color: #ffd23f;
   font-size: 12px;

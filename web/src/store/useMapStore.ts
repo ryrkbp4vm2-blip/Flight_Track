@@ -19,6 +19,8 @@ interface MapState {
   seaClassFilter: Set<VesselClass>;
   /** Draw range rings around the selected contact. */
   rangeRings: boolean;
+  /** Draw the projected (dead-reckoned) track ahead of the selected contact. */
+  projection: boolean;
   /** Two-click distance/bearing measure mode. */
   measureMode: boolean;
   /** Unit system for altitude / speed / distance display. */
@@ -29,6 +31,7 @@ interface MapState {
   toggleAirClass: (c: AircraftClass) => void;
   toggleSeaClass: (c: VesselClass) => void;
   toggleRangeRings: () => void;
+  toggleProjection: () => void;
   toggleMeasure: () => void;
   setUnits: (u: UnitSystem) => void;
 }
@@ -41,6 +44,7 @@ export const useMapStore = create<MapState>((set) => ({
   airClassFilter: new Set(loadPref<AircraftClass[]>("airClassFilter", [])),
   seaClassFilter: new Set(loadPref<VesselClass[]>("seaClassFilter", [])),
   rangeRings: loadPref("rangeRings", false),
+  projection: loadPref("projection", false),
   measureMode: false,
   units: loadPref<UnitSystem>("units", "aviation"),
   flyTo: (lat, lon) =>
@@ -74,6 +78,12 @@ export const useMapStore = create<MapState>((set) => ({
       const rangeRings = !state.rangeRings;
       savePref("rangeRings", rangeRings);
       return { rangeRings };
+    }),
+  toggleProjection: () =>
+    set((state) => {
+      const projection = !state.projection;
+      savePref("projection", projection);
+      return { projection };
     }),
   // Measure mode is transient (not persisted).
   toggleMeasure: () => set((state) => ({ measureMode: !state.measureMode })),

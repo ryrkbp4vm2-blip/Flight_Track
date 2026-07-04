@@ -14,6 +14,7 @@ import AircraftLayer from "./AircraftLayer";
 import VesselLayer from "./VesselLayer";
 import TrailsLayer from "./TrailsLayer";
 import RangeRingsLayer from "./RangeRingsLayer";
+import ProjectionLayer from "./ProjectionLayer";
 import MeasureLayer from "./MeasureLayer";
 import { setMapInstance } from "./mapInstance";
 import { loadPref, savePref } from "../lib/persist";
@@ -113,6 +114,7 @@ export default function MapView() {
       <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} maxZoom={MAX_ZOOM} />
       <TrailsLayer />
       <RangeRingsLayer />
+      <ProjectionLayer />
       <VesselLayer />
       <AircraftLayer />
       <MeasureLayer />

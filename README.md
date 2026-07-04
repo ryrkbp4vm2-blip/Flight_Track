@@ -36,6 +36,9 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
 - 🔎 Search/filter across both aircraft and vessels
 - 📋 Sortable, tabbed list view (Aircraft | Vessels)
 - 🛰️ Flight/voyage trails for the selected contact (or all aircraft trails)
+- ➡️ **Projected track** — dead-reckoned vector showing where the selected
+  contact will be over the next 15 minutes (5/10/15-min ticks), from its current
+  heading and speed
 - 🗺️ Altitude color legend
 - 📐 **Unit systems** — switch between **Aviation** (ft · kt · nm), **Metric**
   (m · km/h · km) and **Imperial** (ft · mph · mi) from the Alerts tab; the choice
