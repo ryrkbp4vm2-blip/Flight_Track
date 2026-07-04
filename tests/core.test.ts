@@ -7,6 +7,8 @@ import { classifyVessel, vesselName, vesselHeading, hasVesselPosition } from "..
 import { haversineNm, bearingDeg, destinationPoint, projectedTrack } from "../web/src/lib/geo.ts";
 import { nearest, compassPoint } from "../web/src/lib/proximity.ts";
 import { solarPosition, subsolarPoint, terminator } from "../web/src/lib/sun.ts";
+import { sparkline, nearestSparkPoint } from "../web/src/lib/spark.ts";
+import { buildSample, SAMPLE_EPOCH } from "../server/src/sampleData.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -198,6 +200,70 @@ test("sun: declination at solstices/equinox and terminator shape", () => {
   assert.equal(t.curve[t.curve.length - 1].lon, 180);
   assert.ok(t.curve.every((p) => p.lat >= -90 && p.lat <= 90 && Number.isFinite(p.lat)));
   assert.equal(t.nightCapLat, -90);
+});
+
+test("spark: scales samples by time, inverts y, handles edge cases", () => {
+  // Climb from 10k to 30k over two minutes.
+  const g = sparkline(
+    [
+      { v: 10_000, t: 0 },
+      { v: 20_000, t: 60_000 },
+      { v: 30_000, t: 120_000 },
+    ],
+    260,
+    48,
+    3,
+  );
+  assert.ok(g);
+  assert.equal(g.min, 10_000);
+  assert.equal(g.max, 30_000);
+  assert.equal(g.points.length, 3);
+  // X spans pad…width−pad, proportional to time.
+  assert.equal(g.points[0].x, 3);
+  assert.equal(g.points[2].x, 257);
+  assert.ok(Math.abs(g.points[1].x - 130) < 0.5);
+  // Y is inverted: the highest altitude sits at the top (smallest y).
+  assert.ok(g.points[2].y < g.points[0].y);
+  assert.equal(g.points[2].y, 3);
+  assert.equal(g.points[0].y, 45);
+  assert.match(g.d, /^M/);
+  assert.match(g.area, /Z$/);
+
+  // Flat altitude renders a mid-height line, not a divide-by-zero.
+  const flat = sparkline([{ v: 5000, t: 0 }, { v: 5000, t: 1000 }], 100, 40, 0);
+  assert.ok(flat);
+  assert.equal(flat.points[0].y, 20);
+
+  // Fewer than two plottable samples → null (single point, NaNs filtered).
+  assert.equal(sparkline([{ v: 5000, t: 0 }], 100, 40), null);
+  assert.equal(sparkline([{ v: NaN, t: 0 }, { v: 5000, t: 1 }], 100, 40), null);
+
+  // Hover snaps to the nearest plotted point.
+  assert.equal(nearestSparkPoint(g.points, 0).v, 10_000);
+  assert.equal(nearestSparkPoint(g.points, 140).v, 20_000);
+  assert.equal(nearestSparkPoint(g.points, 900).v, 30_000);
+});
+
+test("sample feed dead-reckons aircraft over time", () => {
+  const t0 = buildSample(SAMPLE_EPOCH);
+  const t1 = buildSample(SAMPLE_EPOCH + 60_000);
+  assert.equal(t0.total, t1.total);
+
+  const before = t0.ac.find((a) => a.hex === "ae1234")!;
+  const after = t1.ac.find((a) => a.hex === "ae1234")!;
+  // A 451 kt C-17 moves measurably in a minute, but stays in its theater.
+  const moved = Math.hypot(after.lat! - before.lat!, after.lon! - before.lon!);
+  assert.ok(moved > 0.05, `moved ${moved}`);
+  assert.ok(moved < 1, `moved ${moved}`);
+  // Altitude oscillates in clean 25 ft steps with a consistent vertical rate.
+  assert.equal((after.alt_baro as number) % 25, 0);
+  assert.ok(Math.abs((after.alt_baro as number) - 33000) <= 1500 + 25);
+  assert.equal(typeof after.baro_rate, "number");
+
+  // The taxiing aircraft stays on the ground.
+  const ground = t1.ac.find((a) => a.hex === "8a02d7")!;
+  assert.equal(ground.alt_baro, "ground");
+  assert.equal(ground.baro_rate, 0);
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {

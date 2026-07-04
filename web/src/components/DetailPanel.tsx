@@ -5,6 +5,7 @@ import { classLabel, classifyAircraft } from "../lib/classify";
 import { emergencyInfo } from "../lib/emergency";
 import { icaoCountry } from "../lib/icaoCountry";
 import NearbyContacts from "./NearbyContacts";
+import AltitudeSpark from "./AltitudeSpark";
 import {
   callsign,
   formatAltitude,
@@ -93,6 +94,7 @@ export default function DetailPanel() {
           <Row label="Emergency" value={ac.emergency} />
         )}
       </div>
+      <AltitudeSpark hex={ac.hex} />
       {hasPosition(ac) && (
         <div className="detail-actions">
           <button className="detail-btn" onClick={() => flyTo(ac.lat, ac.lon)}>
