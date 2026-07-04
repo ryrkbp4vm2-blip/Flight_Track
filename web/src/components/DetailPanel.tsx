@@ -6,6 +6,7 @@ import { emergencyInfo } from "../lib/emergency";
 import { icaoCountry } from "../lib/icaoCountry";
 import NearbyContacts from "./NearbyContacts";
 import AltitudeSpark from "./AltitudeSpark";
+import ShareButton from "./ShareButton";
 import {
   callsign,
   formatAltitude,
@@ -108,6 +109,7 @@ export default function DetailPanel() {
           >
             {followSelected ? "Following ✓" : "Follow"}
           </button>
+          <ShareButton />
         </div>
       )}
       {hasPosition(ac) && (

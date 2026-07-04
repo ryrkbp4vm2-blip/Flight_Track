@@ -35,7 +35,8 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
   with distance (in your chosen units) and compass bearing; tap one to jump to it
 - ⚠️ **Convergence warnings** — nearby contacts on a closing course are flagged
   with their closest point of approach (CPA) and time to it
-- 🔗 **Shareable deep-links** — the selected aircraft is encoded in the URL
+- 🔗 **Shareable deep-links** — the selected aircraft or vessel is encoded in
+  the URL, with a one-tap **Share** button that copies the link
   (`#sel=<hex>`) and restored on reload
 - 🔎 Search/filter across both aircraft and vessels
 - ⌨️ **Keyboard driven** — `J`/`K` cycle contacts, one-key toggles for follow,

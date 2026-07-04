@@ -12,6 +12,7 @@ import { countryFlag } from "../lib/icaoCountry";
 import { formatSpeed, formatLength } from "../lib/units";
 import { formatCoords } from "../lib/coords";
 import NearbyContacts from "./NearbyContacts";
+import ShareButton from "./ShareButton";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -89,6 +90,7 @@ export default function VesselDetailPanel() {
           <button className="detail-btn" onClick={() => flyTo(v.lat, v.lon)}>
             Center
           </button>
+          <ShareButton />
         </div>
       )}
       {hasVesselPosition(v) && (
