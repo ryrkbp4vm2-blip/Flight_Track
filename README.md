@@ -58,6 +58,8 @@ Rendered from the app's real sample data, glyphs, and layout (`npm run demo`):
   (m · km/h · km) and **Imperial** (ft · mph · mi) from the Alerts tab; the choice
   is remembered and applies to detail panels, list rows, the measure tool and
   range rings
+- 🧭 **Coordinate formats** — positions as decimal degrees, **DMS**
+  (38°57′00″N 77°27′36″W) or **MGRS** (18S UJ 13403 12283), the NATO military grid
 - ⬇️ **Snapshot export** — download the current picture as GeoJSON (contacts +
   trails, for GIS tools) or CSV (for spreadsheets) from the Stats tab
 - 📲 Installable PWA with offline app shell

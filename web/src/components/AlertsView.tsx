@@ -5,6 +5,7 @@ import { useVesselStore } from "../store/useVesselStore";
 import { useMapStore } from "../store/useMapStore";
 import { formatAge } from "../lib/format";
 import { UNIT_SYSTEMS } from "../lib/units";
+import { COORD_FORMATS } from "../lib/coords";
 
 const TOGGLES: { key: keyof AlertSettings; label: string }[] = [
   { key: "emergency", label: "Emergency squawks" },
@@ -19,6 +20,8 @@ export default function AlertsView() {
   const clearLog = useAlertsStore((s) => s.clearLog);
   const units = useMapStore((s) => s.units);
   const setUnits = useMapStore((s) => s.setUnits);
+  const coords = useMapStore((s) => s.coords);
+  const setCoords = useMapStore((s) => s.setCoords);
   const [, tick] = useState(0);
 
   function focus(domain: "air" | "sea", ref: string) {
@@ -64,6 +67,22 @@ export default function AlertsView() {
                 onClick={() => setUnits(u.key)}
               >
                 {u.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="units-select">
+          <span className="units-label">Position</span>
+          <div className="units-seg" role="group" aria-label="Coordinate format">
+            {COORD_FORMATS.map((c) => (
+              <button
+                key={c.key}
+                className={`units-seg-btn${coords === c.key ? " on" : ""}`}
+                aria-pressed={coords === c.key}
+                title={c.hint}
+                onClick={() => setCoords(c.key)}
+              >
+                {c.label}
               </button>
             ))}
           </div>

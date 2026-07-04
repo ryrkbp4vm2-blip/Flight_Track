@@ -5,6 +5,7 @@ import {
   formatVerticalRate as fmtVertical,
   type UnitSystem,
 } from "./units";
+import { formatCoords, type CoordFormat } from "./coords";
 
 /** Trimmed callsign, falling back to registration then hex. */
 export function callsign(ac: Aircraft): string {
@@ -41,9 +42,9 @@ export function formatVerticalRate(ac: Aircraft, sys: UnitSystem = "aviation"): 
   return fmtVertical(ac.baro_rate, sys);
 }
 
-export function formatPosition(ac: Aircraft): string {
+export function formatPosition(ac: Aircraft, fmt: CoordFormat = "decimal"): string {
   if (typeof ac.lat !== "number" || typeof ac.lon !== "number") return "—";
-  return `${ac.lat.toFixed(3)}, ${ac.lon.toFixed(3)}`;
+  return formatCoords(ac.lat, ac.lon, fmt);
 }
 
 /** True when the aircraft has a usable map position. */

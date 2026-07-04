@@ -3,6 +3,7 @@ import { loadPref, savePref } from "../lib/persist";
 import type { AircraftClass } from "../lib/classify";
 import type { VesselClass } from "../lib/vessel";
 import type { UnitSystem } from "../lib/units";
+import type { CoordFormat } from "../lib/coords";
 
 /** Which entity layers are shown on the map. */
 export type LayerMode = "air" | "sea" | "both";
@@ -31,6 +32,8 @@ interface MapState {
   playbackOffsetSec: number;
   /** Unit system for altitude / speed / distance display. */
   units: UnitSystem;
+  /** Coordinate display format (decimal / DMS / MGRS). */
+  coords: CoordFormat;
   flyTo: (lat: number, lon: number) => void;
   setLayers: (mode: LayerMode) => void;
   toggleAllTrails: () => void;
@@ -43,6 +46,7 @@ interface MapState {
   togglePlayback: () => void;
   setPlaybackOffset: (sec: number) => void;
   setUnits: (u: UnitSystem) => void;
+  setCoords: (c: CoordFormat) => void;
 }
 
 /** Cross-cutting map UI state shared by the aircraft and vessel features. */
@@ -59,6 +63,7 @@ export const useMapStore = create<MapState>((set) => ({
   playback: false,
   playbackOffsetSec: 0,
   units: loadPref<UnitSystem>("units", "aviation"),
+  coords: loadPref<CoordFormat>("coords", "decimal"),
   flyTo: (lat, lon) =>
     set((state) => ({ flyTarget: { lat, lon, nonce: (state.flyTarget?.nonce ?? 0) + 1 } })),
   setLayers: (mode) => {
@@ -112,6 +117,10 @@ export const useMapStore = create<MapState>((set) => ({
   setUnits: (u) => {
     savePref("units", u);
     set({ units: u });
+  },
+  setCoords: (c) => {
+    savePref("coords", c);
+    set({ coords: c });
   },
 }));
 

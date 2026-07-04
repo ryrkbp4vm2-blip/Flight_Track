@@ -10,6 +10,7 @@ import {
 } from "../lib/vessel";
 import { countryFlag } from "../lib/icaoCountry";
 import { formatSpeed, formatLength } from "../lib/units";
+import { formatCoords } from "../lib/coords";
 import NearbyContacts from "./NearbyContacts";
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -27,6 +28,7 @@ export default function VesselDetailPanel() {
   const clearSelection = useVesselStore((s) => s.clearSelection);
   const flyTo = useMapStore((s) => s.flyTo);
   const units = useMapStore((s) => s.units);
+  const coords = useMapStore((s) => s.coords);
   const watchedSea = useAlertsStore((s) => s.watchedSea);
   const toggleWatchSea = useAlertsStore((s) => s.toggleWatchSea);
 
@@ -47,7 +49,7 @@ export default function VesselDetailPanel() {
   const heading = vesselHeading(v);
   const pos =
     typeof v.lat === "number" && typeof v.lon === "number"
-      ? `${v.lat.toFixed(3)}, ${v.lon.toFixed(3)}`
+      ? formatCoords(v.lat, v.lon, coords)
       : "—";
 
   return (

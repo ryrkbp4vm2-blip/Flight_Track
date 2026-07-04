@@ -31,6 +31,7 @@ export default function DetailPanel() {
   const select = useAircraftStore((s) => s.select);
   const flyTo = useMapStore((s) => s.flyTo);
   const units = useMapStore((s) => s.units);
+  const coords = useMapStore((s) => s.coords);
   const followSelected = useAircraftStore((s) => s.followSelected);
   const toggleFollow = useAircraftStore((s) => s.toggleFollow);
   const watchedAir = useAlertsStore((s) => s.watchedAir);
@@ -89,7 +90,7 @@ export default function DetailPanel() {
         <Row label="Vertical" value={formatVerticalRate(ac, units)} />
         <Row label="Speed" value={formatSpeed(ac, units)} />
         <Row label="Heading" value={formatHeading(ac)} />
-        <Row label="Position" value={formatPosition(ac)} />
+        <Row label="Position" value={formatPosition(ac, coords)} />
         {ac.emergency && ac.emergency !== "none" && (
           <Row label="Emergency" value={ac.emergency} />
         )}

@@ -13,6 +13,7 @@ import { closestPointOfApproach, isConverging } from "../web/src/lib/cpa.ts";
 import { csvField, snapshotCsv, snapshotGeoJSON } from "../web/src/lib/export.ts";
 import { cycleId } from "../web/src/lib/cycle.ts";
 import { clipTrail, positionAt, playbackLabel } from "../web/src/lib/playback.ts";
+import { utmZone, latBand, toUtm, formatMGRS, formatDMS, formatCoords } from "../web/src/lib/coords.ts";
 import {
   formatAltitude as fmtAltitude,
   formatSpeed as fmtSpeed,
@@ -390,6 +391,48 @@ test("playback: trail clipping, position interpolation, labels", () => {
   assert.equal(playbackLabel(-90), "T−1:30");
   assert.equal(playbackLabel(-300), "T−5:00");
   assert.equal(playbackLabel(-5), "T−0:05");
+});
+
+test("coords: UTM zones/bands, MGRS references, DMS formatting", () => {
+  // Zones, including the Norway and Svalbard exceptions.
+  assert.equal(utmZone(38.95, -77.46), 18);
+  assert.equal(utmZone(48.13, 11.55), 32);
+  assert.equal(utmZone(60, 5), 32); // Norway: band V widened
+  assert.equal(utmZone(55, 5), 31); // …but only in band V
+  assert.equal(utmZone(75, 10), 33); // Svalbard
+
+  // Latitude bands (C…X, no I/O).
+  assert.equal(latBand(38.95), "S");
+  assert.equal(latBand(-33.95), "H");
+  assert.equal(latBand(60), "V");
+  assert.equal(latBand(75), "X");
+  assert.equal(latBand(-80), "C");
+
+  // Canonical UTM vector: the equator/prime-meridian point.
+  const origin = toUtm(0, 0);
+  assert.equal(origin.zone, 31);
+  assert.ok(Math.abs(origin.easting - 166021.44) < 1, `E ${origin.easting}`);
+  assert.ok(Math.abs(origin.northing) < 0.01, `N ${origin.northing}`);
+  assert.equal(formatMGRS(0, 0), "31N AA 66021 00000");
+
+  // Washington DC falls in the well-known 18S UJ square.
+  assert.match(formatMGRS(38.8977, -77.0365), /^18S UJ \d{5} \d{5}$/);
+  assert.ok(formatMGRS(38.8977, -77.0365).startsWith("18S UJ"));
+
+  // Local scale sanity: 0.01° of latitude ≈ 1,111 m of northing.
+  const n1 = toUtm(38.95, -77.46).northing;
+  const n2 = toUtm(38.96, -77.46).northing;
+  assert.ok(Math.abs(n2 - n1 - 1110) < 5, `dN ${n2 - n1}`);
+  // Southern hemisphere carries the 10,000 km false northing.
+  assert.ok(toUtm(-33.95, 151.18).northing > 6_000_000);
+
+  // DMS, including the seconds→minutes carry.
+  assert.equal(formatDMS(38.5, -77.25), "38°30′00″N 77°15′00″W");
+  assert.equal(formatDMS(-33.5, 151.5), "33°30′00″S 151°30′00″E");
+  assert.equal(formatDMS(37.9999999, 0), "38°00′00″N 0°00′00″E");
+
+  assert.equal(formatCoords(38.95, -77.46, "decimal"), "38.950, -77.460");
+  assert.match(formatCoords(38.95, -77.46, "mgrs"), /^18S /);
 });
 
 test("units: convert altitude, speed, distance, length by system", () => {
